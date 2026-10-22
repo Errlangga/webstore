@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
-const MAX_DOCUMENT_BYTES = 8 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 4 * 1024 * 1024;
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const DOCUMENT_TYPES = new Set([
   "application/pdf",
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       }, { status: 415 });
     }
     if (!file.size || file.size > maxBytes) {
-      return NextResponse.json({ error: kind === "document" ? "Ukuran setiap dokumen maksimal 8 MB." : "Ukuran setiap gambar maksimal 4 MB." }, { status: 413 });
+      return NextResponse.json({ error: kind === "document" ? "Ukuran setiap dokumen maksimal 4 MB." : "Ukuran setiap gambar maksimal 4 MB." }, { status: 413 });
     }
 
     const safeName = safeFileName(file.name);
