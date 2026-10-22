@@ -1,14 +1,26 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { whatsappUrl } from "@/lib/format";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
 
 export default function WhatsAppFloat() {
   const pathname = usePathname();
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/store-settings", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => { if (active && typeof data?.whatsapp_number === "string") setWhatsappNumber(data.whatsapp_number); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
   if (pathname.startsWith("/admin")) return null;
 
-  const href = whatsappUrl("Halo admin Astra Market FC Mobile, saya ingin bertanya tentang akun FC Mobile.");
+  const href = whatsappUrl("Halo admin Astra Market FC Mobile, saya ingin bertanya tentang akun FC Mobile.", whatsappNumber);
 
   return (
     <a
