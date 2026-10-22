@@ -33,6 +33,9 @@ export default function AdminDashboard() {
   const productFileRef = useRef<HTMLInputElement>(null);
   const proofFileRef = useRef<HTMLInputElement>(null);
   const documentFileRef = useRef<HTMLInputElement>(null);
+  const heroCard1FileRef = useRef<HTMLInputElement>(null);
+  const heroCard2FileRef = useRef<HTMLInputElement>(null);
+  const fcMobileLogoFileRef = useRef<HTMLInputElement>(null);
   const [tab, setTab] = useState<"products" | "testimonials" | "security" | "settings">("products");
   const [products, setProducts] = useState<Product[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -41,6 +44,12 @@ export default function AdminDashboard() {
   const [productFiles, setProductFiles] = useState<File[]>([]);
   const [documentFiles, setDocumentFiles] = useState<File[]>([]);
   const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [heroCardImage1, setHeroCardImage1] = useState("");
+  const [heroCardImage2, setHeroCardImage2] = useState("");
+  const [fcMobileLogoImage, setFcMobileLogoImage] = useState("");
+  const [heroCardFile1, setHeroCardFile1] = useState<File | null>(null);
+  const [heroCardFile2, setHeroCardFile2] = useState<File | null>(null);
+  const [fcMobileLogoFile, setFcMobileLogoFile] = useState<File | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [buyerName, setBuyerName] = useState("");
   const [productTitle, setProductTitle] = useState("");
@@ -73,6 +82,9 @@ export default function AdminDashboard() {
       setProducts(productData.products || []);
       setTestimonials(testimonialData.testimonials || []);
       setWhatsappNumber(settingsData.settings?.whatsapp_number || "");
+      setHeroCardImage1(settingsData.settings?.hero_card_image_1 || "");
+      setHeroCardImage2(settingsData.settings?.hero_card_image_2 || "");
+      setFcMobileLogoImage(settingsData.settings?.fc_mobile_logo_image || "");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Data gagal dimuat.");
     } finally {
@@ -297,6 +309,58 @@ export default function AdminDashboard() {
     }
   }
 
+  async function saveVisualSettings(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true); setError(""); setNotice("");
+    try {
+      const files = [heroCardFile1, heroCardFile2, fcMobileLogoFile];
+      if (files.some((file) => file && file.size > 4 * 1024 * 1024)) {
+        throw new Error("Setiap foto maksimal 4 MB.");
+      }
+
+      const updates: Record<string, string> = {
+        hero_card_image_1: heroCardImage1,
+        hero_card_image_2: heroCardImage2,
+        fc_mobile_logo_image: fcMobileLogoImage,
+      };
+      if (heroCardFile1) updates.hero_card_image_1 = (await upload(heroCardFile1, "image")).url;
+      if (heroCardFile2) updates.hero_card_image_2 = (await upload(heroCardFile2, "image")).url;
+      if (fcMobileLogoFile) updates.fc_mobile_logo_image = (await upload(fcMobileLogoFile, "image")).url;
+
+      const response = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const data = await responseData(response);
+      setHeroCardImage1(data.settings?.hero_card_image_1 || "");
+      setHeroCardImage2(data.settings?.hero_card_image_2 || "");
+      setFcMobileLogoImage(data.settings?.fc_mobile_logo_image || "");
+      setHeroCardFile1(null); setHeroCardFile2(null); setFcMobileLogoFile(null);
+      if (heroCard1FileRef.current) heroCard1FileRef.current.value = "";
+      if (heroCard2FileRef.current) heroCard2FileRef.current.value = "";
+      if (fcMobileLogoFileRef.current) fcMobileLogoFileRef.current.value = "";
+      setNotice(data.message || "Foto kartu pemain dan logo berhasil disimpan.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Foto dan logo gagal disimpan.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function resetVisualField(field: "card1" | "card2" | "logo") {
+    if (field === "card1") {
+      setHeroCardImage1(""); setHeroCardFile1(null);
+      if (heroCard1FileRef.current) heroCard1FileRef.current.value = "";
+    } else if (field === "card2") {
+      setHeroCardImage2(""); setHeroCardFile2(null);
+      if (heroCard2FileRef.current) heroCard2FileRef.current.value = "";
+    } else {
+      setFcMobileLogoImage(""); setFcMobileLogoFile(null);
+      if (fcMobileLogoFileRef.current) fcMobileLogoFileRef.current.value = "";
+    }
+  }
+
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
     router.replace("/admin/login");
@@ -402,7 +466,34 @@ export default function AdminDashboard() {
           <section className="admin-panel">
             <h2>Informasi dokumen katalog</h2>
             <p>Setiap akun dapat memiliki hingga 10 dokumen publik. Format yang didukung: PDF, TXT, CSV, DOC/DOCX, XLS/XLSX, dan PPTX.</p>
-            <small className="form-hint">Maksimal 8 MB per dokumen. Jangan mengunggah kredensial akun, password, atau data pribadi pelanggan.</small>
+            <small className="form-hint">Maksimal 4 MB per dokumen. Jangan mengunggah kredensial akun, password, atau data pribadi pelanggan.</small>
+          </section>
+          <section className="admin-panel admin-panel-visuals">
+            <h2>Foto hero & logo FC Mobile</h2>
+            <p>Ganti foto kartu pemain dan logo yang tampil di halaman depan tanpa mengubah kode website. Pilih gambar, lalu tekan Simpan visual.</p>
+            <form className="admin-form" onSubmit={saveVisualSettings}>
+              <div className="visual-upload-grid">
+                <div className="visual-upload-item">
+                  <div className="visual-upload-preview"><img src={heroCardImage1 || "/fc-mobile-card-bellingham.webp"} alt="Pratinjau foto pemain pertama" /></div>
+                  <label className="form-field"><span>Foto kartu pemain 1</span><input ref={heroCard1FileRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => setHeroCardFile1(e.target.files?.[0] || null)} /><small className="form-hint">JPG, PNG, WEBP atau AVIF. Maksimal 4 MB.</small></label>
+                  {heroCardFile1 && <small className="form-hint">Foto baru: {heroCardFile1.name}</small>}
+                  <button type="button" className="small-button" onClick={() => resetVisualField("card1")}>Pakai foto bawaan</button>
+                </div>
+                <div className="visual-upload-item">
+                  <div className="visual-upload-preview"><img src={heroCardImage2 || "/fc-mobile-card-mbappe.webp"} alt="Pratinjau foto pemain kedua" /></div>
+                  <label className="form-field"><span>Foto kartu pemain 2</span><input ref={heroCard2FileRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => setHeroCardFile2(e.target.files?.[0] || null)} /><small className="form-hint">JPG, PNG, WEBP atau AVIF. Maksimal 4 MB.</small></label>
+                  {heroCardFile2 && <small className="form-hint">Foto baru: {heroCardFile2.name}</small>}
+                  <button type="button" className="small-button" onClick={() => resetVisualField("card2")}>Pakai foto bawaan</button>
+                </div>
+                <div className="visual-upload-item">
+                  <div className="visual-upload-preview logo-preview"><img src={fcMobileLogoImage || "/fc-mobile-logo.svg"} alt="Pratinjau logo FC Mobile" /></div>
+                  <label className="form-field"><span>Foto logo FC Mobile</span><input ref={fcMobileLogoFileRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => setFcMobileLogoFile(e.target.files?.[0] || null)} /><small className="form-hint">Bisa ganti logo ke PNG transparan atau foto logo sendiri. Maksimal 4 MB.</small></label>
+                  {fcMobileLogoFile && <small className="form-hint">Logo baru: {fcMobileLogoFile.name}</small>}
+                  <button type="button" className="small-button" onClick={() => resetVisualField("logo")}>Pakai logo bawaan</button>
+                </div>
+              </div>
+              <button type="submit" className="button button-primary" disabled={busy}>{busy ? "Mengunggah dan menyimpan..." : "Simpan visual"} <span>↗</span></button>
+            </form>
           </section>
         </div>
       )}
