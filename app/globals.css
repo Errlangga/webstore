@@ -388,3 +388,73 @@ main { min-height: 65vh; }
   .hero-actions .button { width: 100%; justify-content: space-between; }
   .form-row { grid-template-columns: 1fr; }
 }
+
+
+/* Astra motion system: expressive, smooth, and respectful of reduced-motion preferences. */
+:root { --ease-smooth: cubic-bezier(.22, 1, .36, 1); --ease-emphasis: cubic-bezier(.2, .8, .2, 1); }
+html { scroll-behavior: smooth; }
+body { background-image: radial-gradient(ellipse at 12% 2%, rgba(201,250,87,.055), transparent 34%), radial-gradient(ellipse at 92% 32%, rgba(35,211,102,.035), transparent 27%); background-attachment: fixed; }
+a, button, input, textarea, select { transition-timing-function: var(--ease-smooth); }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.brand-mark { transition: transform .42s var(--ease-smooth), box-shadow .42s var(--ease-smooth); }
+.brand:hover .brand-mark { transform: skew(-5deg) rotate(-5deg) scale(1.055); box-shadow: 0 0 26px rgba(201,250,87,.22); }
+.site-header { transition: background .35s var(--ease-smooth), border-color .35s var(--ease-smooth), box-shadow .35s var(--ease-smooth); }
+.nav-link, .nav-cta, .text-link, .footer-links a, .filter-chip, .gallery-thumb { transition-duration: .28s; }
+.nav-cta { position: relative; overflow: hidden; }
+.nav-cta::after, .button::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 15%, rgba(255,255,255,.18) 48%, transparent 74%); transform: translateX(-140%); transition: transform .7s var(--ease-smooth); }
+.nav-cta:hover::after, .button-primary:hover::after { transform: translateX(140%); }
+.button { position: relative; overflow: hidden; transition: transform .32s var(--ease-smooth), background .32s var(--ease-smooth), border-color .32s var(--ease-smooth), box-shadow .32s var(--ease-smooth); }
+.button:active:not(:disabled) { transform: translateY(0) scale(.975); }
+.button-primary:hover:not(:disabled) { box-shadow: 0 10px 30px rgba(201,250,87,.15); }
+.product-card { transition: transform .45s var(--ease-smooth), border-color .35s var(--ease-smooth), box-shadow .45s var(--ease-smooth); }
+.product-card:hover { transform: translateY(-7px); box-shadow: 0 24px 54px rgba(0,0,0,.28), 0 0 0 1px rgba(201,250,87,.06); }
+.product-cover > img { transition: transform .8s var(--ease-smooth), filter .6s var(--ease-smooth); }
+.product-card:hover .product-cover > img { transform: scale(1.065); filter: saturate(1.08); }
+.cover-arrow { transition: transform .35s var(--ease-smooth), background .35s var(--ease-smooth), border-color .35s var(--ease-smooth); }
+.product-card:hover .cover-arrow { transform: rotate(45deg); border-color: var(--accent); background: var(--accent); color: #080a0c; }
+.testimonial-card, .admin-panel, .featured-empty, .closing-cta { transition: border-color .35s var(--ease-smooth), transform .4s var(--ease-smooth), box-shadow .4s var(--ease-smooth); }
+.testimonial-card:hover { border-color: rgba(201,250,87,.26); transform: translateY(-3px); box-shadow: 0 18px 45px rgba(0,0,0,.18); }
+.filter-chip { transition: color .25s var(--ease-smooth), border-color .25s var(--ease-smooth), background .25s var(--ease-smooth), transform .25s var(--ease-smooth); }
+.filter-chip:active { transform: scale(.96); }
+.gallery-thumb { transition: border-color .28s var(--ease-smooth), transform .28s var(--ease-smooth), opacity .28s var(--ease-smooth); }
+.gallery-thumb:hover { transform: translateY(-2px); }
+.hero-copy { animation: astra-enter .75s var(--ease-smooth) both; }
+.hero-visual { animation: astra-visual-enter .9s .08s var(--ease-smooth) both; }
+.hero-card-front { animation: astra-card-float 7.5s ease-in-out 1s infinite; }
+.hero-card-back { animation: astra-card-float-back 9s ease-in-out 1.2s infinite; }
+.float-rating { animation: astra-float-note 5s ease-in-out 1s infinite; }
+.float-bottom { animation: astra-float-note 5.7s ease-in-out 1.4s infinite; }
+.home-page, .page-shell, .detail-page, .not-found, .admin-shell, .admin-login-wrap { animation: astra-page-enter .55s var(--ease-smooth) both; }
+.whatsapp-cta { background: #25d366; color: #06230f; border-color: rgba(37,211,102,.72); gap: 11px; min-height: 54px; box-shadow: 0 10px 30px rgba(37,211,102,.08); }
+.whatsapp-cta:hover { background: #40e47c; border-color: #40e47c; color: #06230f; box-shadow: 0 15px 38px rgba(37,211,102,.2); transform: translateY(-3px); }
+.whatsapp-cta .whatsapp-icon { flex: 0 0 auto; width: 21px; height: 21px; }
+.whatsapp-arrow { margin-left: auto; font-size: 17px; transition: transform .3s var(--ease-smooth); }
+.whatsapp-cta:hover .whatsapp-arrow { transform: translate(3px, -3px); }
+.whatsapp-float { position: fixed; right: clamp(16px, 2.8vw, 32px); bottom: clamp(16px, 2.8vw, 30px); z-index: 80; min-height: 62px; display: inline-flex; align-items: center; gap: 12px; padding: 0 18px 0 12px; border: 1px solid rgba(255,255,255,.38); border-radius: 999px; color: #06230f; background: linear-gradient(135deg, #58f28b, #25d366 68%); box-shadow: 0 14px 42px rgba(0,0,0,.35), 0 0 0 1px rgba(37,211,102,.18); isolation: isolate; transition: transform .38s var(--ease-smooth), box-shadow .38s var(--ease-smooth), filter .38s var(--ease-smooth); animation: astra-whatsapp-in .7s .25s var(--ease-smooth) both; }
+.whatsapp-float::before { content: ""; position: absolute; inset: -4px; border: 1px solid rgba(37,211,102,.52); border-radius: inherit; z-index: -1; animation: astra-whatsapp-pulse 2.8s ease-out 1s infinite; pointer-events: none; }
+.whatsapp-float:hover { transform: translateY(-6px) scale(1.025); filter: saturate(1.08); box-shadow: 0 22px 52px rgba(0,0,0,.38), 0 0 32px rgba(37,211,102,.23); }
+.whatsapp-float:active { transform: translateY(-1px) scale(.97); }
+.whatsapp-float-icon { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: rgba(4,45,20,.12); }
+.whatsapp-float-icon svg { width: 24px; height: 24px; }
+.whatsapp-float-copy { display: grid; gap: 2px; }
+.whatsapp-float-copy strong { font-size: 12px; letter-spacing: -.02em; }
+.whatsapp-float-copy small { font-size: 9px; opacity: .72; }
+.whatsapp-float-arrow { font-size: 15px; font-weight: 800; transition: transform .3s var(--ease-smooth); }
+.whatsapp-float:hover .whatsapp-float-arrow { transform: translate(2px, -2px); }
+@keyframes astra-page-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes astra-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes astra-visual-enter { from { opacity: 0; transform: translateY(14px) scale(.975); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes astra-card-float { 0%, 100% { transform: rotate(-8deg) translate(-19px, 0); } 50% { transform: rotate(-6.8deg) translate(-19px, -8px); } }
+@keyframes astra-card-float-back { 0%, 100% { transform: rotate(14deg) translate(55px, 8px); } 50% { transform: rotate(12.8deg) translate(55px, 0); } }
+@keyframes astra-float-note { 0%, 100% { translate: 0 0; } 50% { translate: 0 -7px; } }
+@keyframes astra-whatsapp-in { from { opacity: 0; transform: translateY(18px) scale(.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes astra-whatsapp-pulse { 0% { transform: scale(.96); opacity: .72; } 75%, 100% { transform: scale(1.16); opacity: 0; } }
+@media (max-width: 760px) {
+  .whatsapp-float { right: 15px; bottom: 15px; min-height: 56px; gap: 9px; padding: 0 14px 0 8px; }
+  .whatsapp-float-icon { width: 38px; height: 38px; }
+  .whatsapp-float-copy strong { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
