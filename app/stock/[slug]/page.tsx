@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import ProductGallery from "@/components/ProductGallery";
 import { getProductBySlug } from "@/lib/data";
 import { formatRupiah, whatsappUrl } from "@/lib/format";
+import WhatsAppIcon from "@/components/WhatsAppIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
-  const orderLink = whatsappUrl(`Halo admin OVR MARKET, saya tertarik dengan akun: ${product.title} (ID katalog #${product.id}). Boleh minta info selengkapnya?`);
+  const orderLink = whatsappUrl(`Halo admin Astra Market FC Mobile, saya tertarik dengan akun: ${product.title} (ID katalog #${product.id}). Boleh minta info selengkapnya?`);
   const players = product.players.split(",").map((item) => item.trim()).filter(Boolean);
   return (
     <div className="section-shell detail-page">
@@ -33,8 +34,8 @@ export default async function ProductDetailPage({ params }: Props) {
           <div className="price-panel"><span>HARGA YANG DITAWARKAN</span><strong>{formatRupiah(Number(product.price))}</strong><small>Harga dapat dikonfirmasi kembali ke admin sebelum transaksi.</small></div>
           {players.length > 0 && <div className="detail-spec"><h3>PLAYER HIGHLIGHTS</h3><div className="player-tags">{players.map((player) => <span key={player}>{player}</span>)}</div></div>}
           <div className="detail-spec"><h3>SEBELUM TRANSAKSI</h3><ul className="detail-checklist"><li>Periksa foto galeri dan detail akun.</li><li>Tanyakan informasi yang belum tercantum ke admin.</li><li>Konfirmasi keamanan, metode serah terima, dan harga.</li></ul></div>
-          {product.status === "available" ? <a className="button button-primary detail-order" href={orderLink} target="_blank" rel="noreferrer">Tanya admin via WhatsApp <span>↗</span></a> : <button className="button button-disabled" disabled>Stok sudah terjual</button>}
-          <p className="detail-disclaimer">OVR MARKET adalah store independen. Pastikan seluruh ketentuan dan risiko transfer akun dipahami sebelum membeli.</p>
+          {product.status === "available" ? <a className="button button-primary detail-order whatsapp-cta" href={orderLink} target="_blank" rel="noreferrer"><WhatsAppIcon className="whatsapp-icon" /> <span>Chat admin via WhatsApp</span> <span className="whatsapp-arrow" aria-hidden="true">↗</span></a> : <button className="button button-disabled" disabled>Stok sudah terjual</button>}
+          <p className="detail-disclaimer">Astra Market FC Mobile adalah store independen. Pastikan seluruh ketentuan dan risiko transfer akun dipahami sebelum membeli.</p>
         </section>
       </div>
     </div>

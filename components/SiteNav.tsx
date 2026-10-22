@@ -14,9 +14,9 @@ export default function SiteNav() {
   return (
     <header className="site-header">
       <div className="nav-wrap">
-        <Link href="/" className="brand" aria-label="OVR Market beranda">
-          <span className="brand-mark">OVR<span>+</span></span>
-          <span className="brand-copy"><b>OVR MARKET</b><small>FC MOBILE ACCOUNT STORE</small></span>
+        <Link href="/" className="brand" aria-label="Astra Market FC Mobile beranda">
+          <span className="brand-mark">A<span>✦</span></span>
+          <span className="brand-copy"><b>ASTRA MARKET</b><small>FC MOBILE ACCOUNT STORE</small></span>
         </Link>
         <nav className="main-nav" aria-label="Navigasi utama">
           {links.map((link) => (
