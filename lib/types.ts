@@ -10,6 +10,7 @@ export type Product = {
   description: string;
   category: string;
   players: string;
+  seller_whatsapp: string;
   images: string[];
   documents: ProductDocument[];
   status: ProductStatus;
