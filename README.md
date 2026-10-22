@@ -23,6 +23,7 @@ Astra Market FC Mobile account storefront built with Next.js App Router, Neon Po
 - `ADMIN_PASSWORD`: initial admin password used only to bootstrap the first credential and as the reset target. Set it as a sensitive Vercel environment variable, then change it from the dashboard after the first login. The active password is stored as a salted scrypt hash in Neon.
 - `ADMIN_DASHBOARD_PATH`: private admin route prefix in production, for example a long, random path segment. `/admin` is deliberately blocked in production.
 - `NEXT_PUBLIC_ADMIN_DASHBOARD_PATH`: set to the same path as `ADMIN_DASHBOARD_PATH` so browser-side redirects reach the configured admin login page. The custom path is only an extra layer; never rely on obscurity instead of the password/session checks.
+- After changing either admin path variable in Vercel, redeploy the project so the server route proxy and client-side redirects use the same configured value. Keep the production login URL private; server-side session validation remains mandatory.
 - `SESSION_SECRET`: recommended random secret (at least 32 characters) used to sign the admin session cookie. If unset, the app falls back to the Neon connection string.
 - `BLOB_READ_WRITE_TOKEN`: Vercel Blob read/write token, required for image uploads.
 - `NEXT_PUBLIC_WHATSAPP_NUMBER`: recommended WhatsApp number for direct-to-admin chat in international format, digits only (e.g. `6281234567890`).
