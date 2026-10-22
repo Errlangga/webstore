@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+const ADMIN_DASHBOARD_PATH = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PATH || "/admin";
+
 export default function AdminLoginForm() {
   const router = useRouter();
   const [password, setPassword] = useState("");
@@ -22,7 +24,7 @@ export default function AdminLoginForm() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Login gagal.");
-      router.replace("/admin");
+      router.replace(ADMIN_DASHBOARD_PATH);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login gagal, coba lagi.");
