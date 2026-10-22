@@ -21,10 +21,24 @@ function validateProduct(body: Record<string, unknown>) {
   const images = Array.isArray(body.images)
     ? body.images.filter((url): url is string => typeof url === "string" && url.startsWith("https://") && url.includes(".")).slice(0, 10)
     : [];
+  const documents = Array.isArray(body.documents)
+    ? body.documents.filter((item): item is { url: string; name: string; contentType?: string; size?: number } =>
+        !!item && typeof item === "object" &&
+        typeof (item as { url?: unknown }).url === "string" &&
+        (item as { url: string }).url.startsWith("https://") &&
+        typeof (item as { name?: unknown }).name === "string" &&
+        (item as { name: string }).name.trim().length > 0
+      ).slice(0, 10).map((item) => ({
+        url: item.url.slice(0, 2048),
+        name: item.name.trim().replace(/[\\/]/g, "-").slice(0, 160),
+        contentType: typeof item.contentType === "string" ? item.contentType.slice(0, 120) : "application/octet-stream",
+        size: Number.isFinite(item.size) ? Math.max(0, Math.min(Number(item.size), 4 * 1024 * 1024)) : 0,
+      }))
+    : [];
   if (title.length < 3) return { error: "Judul produk minimal 3 karakter." } as const;
   if (!Number.isFinite(price) || price < 0 || price > 999999999999) return { error: "Harga tidak valid." } as const;
   if (description.length < 5) return { error: "Deskripsi produk minimal 5 karakter." } as const;
-  return { title, price: Math.round(price), description, category, players, status, featured, images } as const;
+  return { title, price: Math.round(price), description, category, players, status, featured, images, documents } as const;
 }
 
 export async function GET() {
@@ -52,8 +66,8 @@ export async function POST(request: Request) {
     const existing = await sql`SELECT id FROM products WHERE slug = ${baseSlug} LIMIT 1`;
     const slug = existing.length ? `${baseSlug}-${Date.now().toString().slice(-6)}` : baseSlug;
     const rows = await sql`
-      INSERT INTO products (title, slug, price, description, category, players, images, status, featured)
-      VALUES (${product.title}, ${slug}, ${product.price}, ${product.description}, ${product.category}, ${product.players}, ${JSON.stringify(product.images)}::jsonb, ${product.status}, ${product.featured})
+      INSERT INTO products (title, slug, price, description, category, players, images, documents, status, featured)
+      VALUES (${product.title}, ${slug}, ${product.price}, ${product.description}, ${product.category}, ${product.players}, ${JSON.stringify(product.images)}::jsonb, ${JSON.stringify(product.documents)}::jsonb, ${product.status}, ${product.featured})
       RETURNING *
     `;
     return NextResponse.json({ product: rows[0] }, { status: 201 });
@@ -86,7 +100,7 @@ export async function PUT(request: Request) {
       UPDATE products SET
         title = ${product.title}, slug = ${slug}, price = ${product.price},
         description = ${product.description}, category = ${product.category}, players = ${product.players},
-        images = ${JSON.stringify(product.images)}::jsonb, status = ${product.status},
+        images = ${JSON.stringify(product.images)}::jsonb, documents = ${JSON.stringify(product.documents)}::jsonb, status = ${product.status},
         featured = ${product.featured}, updated_at = NOW()
       WHERE id = ${id} RETURNING *
     `;

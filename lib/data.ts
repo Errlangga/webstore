@@ -48,3 +48,18 @@ export async function getTestimonials(visibleOnly = true): Promise<Testimonial[]
     return [];
   }
 }
+
+
+export type StoreSettings = { whatsapp_number: string };
+
+export async function getStoreSettings(): Promise<StoreSettings> {
+  if (!process.env.DATABASE_URL) return { whatsapp_number: "" };
+  try {
+    const sql = getDb();
+    const rows = await sql`SELECT value FROM store_settings WHERE key = 'whatsapp_number' LIMIT 1`;
+    return { whatsapp_number: typeof rows[0]?.value === "string" ? rows[0].value : "" };
+  } catch (error) {
+    console.error("Failed to load store settings:", error);
+    return { whatsapp_number: "" };
+  }
+}

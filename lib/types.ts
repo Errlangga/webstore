@@ -1,5 +1,7 @@
 export type ProductStatus = "available" | "sold";
 
+export type ProductDocument = { url: string; name: string; contentType?: string; size?: number };
+
 export type Product = {
   id: number;
   title: string;
@@ -9,6 +11,7 @@ export type Product = {
   category: string;
   players: string;
   images: string[];
+  documents: ProductDocument[];
   status: ProductStatus;
   featured: boolean;
   created_at: string;

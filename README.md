@@ -6,7 +6,8 @@ Astra Market FC Mobile account storefront built with Next.js App Router, Neon Po
 - Responsive landing page, stock catalogue, product detail pages, and testimonials.
 - Password-protected admin dashboard for products, multi-image galleries, stock status, testimonials, and account security (change/reset password).
 - Product photos stored in Vercel Blob; product data stored in Neon.
-- Checkout/contact via WhatsApp.
+- Checkout/contact via WhatsApp configured from the admin dashboard.
+- Up to 10 public document attachments per listing (PDF, TXT, CSV, DOC/DOCX, XLS/XLSX, PPTX), 4 MB each.
 
 ## Local setup
 1. Install Node.js 20.9+ and run `npm install`.

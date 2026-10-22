@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="116" viewBox="0 0 560 116" role="img" aria-labelledby="title desc">
+  <title id="title">Astra Market FC Mobile</title>
+  <desc id="desc">A geometric lime A badge and ASTRA MARKET wordmark with FC MOBILE ACCOUNT STORE tagline.</desc>
+  <path d="M8 10H114L101 106H0Z" fill="#c9fa57"/>
+  <path d="M23 82 46 29h24l23 53H72l-4-11H47l-4 11Zm30-25h11l-5.5-15Z" fill="#080a0c"/>
+  <path d="M57 68 61 76 69 80 61 84 57 92 53 84 45 80 53 76Z" fill="#080a0c"/>
+  <g fill="#f2f4ed" font-family="Arial, Helvetica, sans-serif" font-weight="800">
+    <text x="137" y="52" font-size="36" letter-spacing="2.8">ASTRA MARKET</text>
+  </g>
+  <text x="139" y="79" fill="#8f9890" font-family="'Courier New', monospace" font-size="14" letter-spacing="2.5">FC MOBILE ACCOUNT STORE</text>
+  <path d="M139 94H289" stroke="#c9fa57" stroke-width="2" opacity=".85"/>
+</svg>
