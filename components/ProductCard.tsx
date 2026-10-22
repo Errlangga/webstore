@@ -8,7 +8,7 @@ export default function ProductCard({ product }: { product: Product }) {
     <article className="product-card">
       <Link href={`/stock/${product.slug}`} className="product-cover" aria-label={`Lihat ${product.title}`}>
         {cover ? <img src={cover} alt={product.title} loading="lazy" /> : (
-          <div className="cover-placeholder"><span className="cover-overline">OVR MARKET / FC MOBILE</span><strong>{product.title.slice(0, 1).toUpperCase()}</strong><span className="cover-caption">SQUAD COLLECTION</span></div>
+          <div className="cover-placeholder"><span className="cover-overline">ASTRA MARKET / FC MOBILE</span><strong>{product.title.slice(0, 1).toUpperCase()}</strong><span className="cover-caption">SQUAD COLLECTION</span></div>
         )}
         <span className={product.status === "available" ? "stock-badge is-available" : "stock-badge is-sold"}>{product.status === "available" ? "● Tersedia" : "Terjual"}</span>
         {product.featured && <span className="featured-badge">PILIHAN</span>}
