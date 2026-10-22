@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { whatsappUrl } from "@/lib/format";
 
 const links = [
   { href: "/", label: "Beranda" },
@@ -11,6 +13,23 @@ const links = [
 
 export default function SiteNav() {
   const pathname = usePathname();
+  const [adminWhatsapp, setAdminWhatsapp] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/store-settings", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (active && typeof data?.whatsapp_number === "string") setAdminWhatsapp(data.whatsapp_number);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const postingUrl = whatsappUrl(
+    "Halo admin Astra Market FC Mobile, saya ingin menggunakan jasa posting. Boleh minta informasi syarat dan biayanya?",
+    adminWhatsapp,
+  );
   return (
     <header className="site-header">
       <div className="nav-wrap">
@@ -23,6 +42,7 @@ export default function SiteNav() {
               {link.label}
             </Link>
           ))}
+          <a className="nav-link service-nav-link" href={postingUrl} target="_blank" rel="noreferrer">Jasa Posting <span aria-hidden="true">↗</span></a>
         </nav>
         <Link className="nav-cta" href="/stock">Cari akun <span aria-hidden="true">↗</span></Link>
       </div>

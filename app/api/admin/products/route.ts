@@ -16,6 +16,8 @@ function validateProduct(body: Record<string, unknown>) {
   const description = cleanText(body.description, 6000);
   const category = cleanText(body.category, 80) || "Akun FC Mobile";
   const players = cleanText(body.players, 1200);
+  const sellerWhatsappRaw = cleanText(body.seller_whatsapp, 24);
+  const sellerWhatsapp = sellerWhatsappRaw.replace(/\D/g, "");
   const status = body.status === "sold" ? "sold" : "available";
   const featured = body.featured === true;
   const images = Array.isArray(body.images)
@@ -38,7 +40,10 @@ function validateProduct(body: Record<string, unknown>) {
   if (title.length < 3) return { error: "Judul produk minimal 3 karakter." } as const;
   if (!Number.isFinite(price) || price < 0 || price > 999999999999) return { error: "Harga tidak valid." } as const;
   if (description.length < 5) return { error: "Deskripsi produk minimal 5 karakter." } as const;
-  return { title, price: Math.round(price), description, category, players, status, featured, images, documents } as const;
+  if (sellerWhatsappRaw && (sellerWhatsapp.length < 8 || sellerWhatsapp.length > 15)) {
+    return { error: "Nomor WhatsApp seller harus 8–15 digit internasional, misalnya 6281234567890." } as const;
+  }
+  return { title, price: Math.round(price), description, category, players, seller_whatsapp: sellerWhatsapp, status, featured, images, documents } as const;
 }
 
 export async function GET() {
@@ -66,8 +71,8 @@ export async function POST(request: Request) {
     const existing = await sql`SELECT id FROM products WHERE slug = ${baseSlug} LIMIT 1`;
     const slug = existing.length ? `${baseSlug}-${Date.now().toString().slice(-6)}` : baseSlug;
     const rows = await sql`
-      INSERT INTO products (title, slug, price, description, category, players, images, documents, status, featured)
-      VALUES (${product.title}, ${slug}, ${product.price}, ${product.description}, ${product.category}, ${product.players}, ${JSON.stringify(product.images)}::jsonb, ${JSON.stringify(product.documents)}::jsonb, ${product.status}, ${product.featured})
+      INSERT INTO products (title, slug, price, description, category, players, seller_whatsapp, images, documents, status, featured)
+      VALUES (${product.title}, ${slug}, ${product.price}, ${product.description}, ${product.category}, ${product.players}, ${product.seller_whatsapp}, ${JSON.stringify(product.images)}::jsonb, ${JSON.stringify(product.documents)}::jsonb, ${product.status}, ${product.featured})
       RETURNING *
     `;
     return NextResponse.json({ product: rows[0] }, { status: 201 });
@@ -100,7 +105,7 @@ export async function PUT(request: Request) {
       UPDATE products SET
         title = ${product.title}, slug = ${slug}, price = ${product.price},
         description = ${product.description}, category = ${product.category}, players = ${product.players},
-        images = ${JSON.stringify(product.images)}::jsonb, documents = ${JSON.stringify(product.documents)}::jsonb, status = ${product.status},
+        seller_whatsapp = ${product.seller_whatsapp}, images = ${JSON.stringify(product.images)}::jsonb, documents = ${JSON.stringify(product.documents)}::jsonb, status = ${product.status},
         featured = ${product.featured}, updated_at = NOW()
       WHERE id = ${id} RETURNING *
     `;

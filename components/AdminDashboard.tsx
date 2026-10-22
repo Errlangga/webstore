@@ -11,15 +11,18 @@ type ProductForm = {
   description: string;
   category: string;
   players: string;
+  seller_whatsapp: string;
   status: ProductStatus;
   featured: boolean;
   images: string[];
   documents: ProductDocument[];
 };
 
+const ADMIN_DASHBOARD_PATH = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PATH || "/admin";
+
 const blankProduct: ProductForm = {
   title: "", price: "", description: "", category: "Akun FC Mobile",
-  players: "", status: "available", featured: false, images: [], documents: [],
+  players: "", seller_whatsapp: "", status: "available", featured: false, images: [], documents: [],
 };
 
 async function responseData(response: Response) {
@@ -73,7 +76,7 @@ export default function AdminDashboard() {
         fetch("/api/admin/settings", { cache: "no-store" }),
       ]);
       if (productResponse.status === 401 || testimonialResponse.status === 401 || settingsResponse.status === 401) {
-        router.replace("/admin/login");
+        router.replace(`${ADMIN_DASHBOARD_PATH}/login`);
         return;
       }
       const productData = await responseData(productResponse);
@@ -116,6 +119,7 @@ export default function AdminDashboard() {
       description: product.description || "",
       category: product.category || "Akun FC Mobile",
       players: product.players || "",
+      seller_whatsapp: product.seller_whatsapp || "",
       status: product.status,
       featured: product.featured,
       images: product.images || [],
@@ -394,6 +398,7 @@ export default function AdminDashboard() {
               </div>
               <label className="form-field"><span>Deskripsi</span><textarea required minLength={5} maxLength={6000} value={form.description} onChange={(e) => updateForm("description", e.target.value)} placeholder="Jelaskan detail akun, OVR, rank, resource, bind, dan hal penting lain." /></label>
               <label className="form-field"><span>Pemain unggulan (pisahkan dengan koma)</span><input maxLength={1200} value={form.players} onChange={(e) => updateForm("players", e.target.value)} placeholder="Mbappé, Messi, Ronaldo..." /></label>
+              <label className="form-field"><span>Nomor WhatsApp seller (opsional)</span><input inputMode="tel" autoComplete="tel" maxLength={24} value={form.seller_whatsapp} onChange={(e) => updateForm("seller_whatsapp", e.target.value)} placeholder="6281234567890" /><small className="form-hint">Isi nomor seller dengan kode negara, misalnya 62. Jika kosong, tombol WhatsApp katalog akan mengarah ke admin store.</small></label>
               <label className="form-field"><span>Foto katalog (bisa pilih beberapa)</span><input ref={productFileRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple onChange={(e) => setProductFiles(Array.from(e.target.files || []))} /><small className="form-hint">JPG, PNG, WEBP, AVIF. Maksimal 4 MB per foto dan total 10 foto. Foto dikirim ke Vercel Blob.</small></label>
               {form.images.length > 0 && <div><span className="form-label">Foto tersimpan ({form.images.length})</span><div className="gallery-thumbs">{form.images.map((src, index) => <button key={src} type="button" className="gallery-thumb" title="Hapus foto tersimpan" onClick={() => updateForm("images", form.images.filter((_, i) => i !== index))}><img src={src} alt={`Foto tersimpan ${index + 1}`} /></button>)}</div><small className="form-hint">Klik foto untuk menghapus dari daftar produk. File lama tetap tersimpan di Blob.</small></div>}
               {productFiles.length > 0 && <p className="form-hint">{productFiles.length} foto baru dipilih: {productFiles.map((file) => file.name).join(", ")}</p>}
@@ -408,7 +413,7 @@ export default function AdminDashboard() {
           </section>
           <section className="admin-panel">
             <h2>Listing katalog <span className="admin-badge">{products.length} akun</span></h2>
-            {!products.length ? <div className="admin-empty">Belum ada akun. Tambahkan akun pertama melalui formulir ini.</div> : <div className="admin-list">{products.map((product) => <article className="admin-list-item" key={product.id}><div className="admin-list-thumb">{product.images?.[0] ? <img src={product.images[0]} alt="" /> : "OVR"}</div><div className="admin-list-info"><b>{product.title}</b><small>{formatRupiah(Number(product.price))} · {product.status === "available" ? "Tersedia" : "Terjual"}{product.featured ? " · Featured" : ""}</small><small>{product.images?.length || 0} foto · {product.documents?.length || 0} dokumen · #{product.id}</small></div><div className="admin-list-actions"><button className="small-button" onClick={() => startEdit(product)}>Edit</button><button className="small-button" onClick={() => void toggleStatus(product)}>{product.status === "available" ? "Tandai terjual" : "Aktifkan stok"}</button><button className="small-button danger" onClick={() => void removeProduct(Number(product.id))}>Hapus</button></div></article>)}</div>}
+            {!products.length ? <div className="admin-empty">Belum ada akun. Tambahkan akun pertama melalui formulir ini.</div> : <div className="admin-list">{products.map((product) => <article className="admin-list-item" key={product.id}><div className="admin-list-thumb">{product.images?.[0] ? <img src={product.images[0]} alt="" /> : "OVR"}</div><div className="admin-list-info"><b>{product.title}</b><small>{formatRupiah(Number(product.price))} · {product.status === "available" ? "Tersedia" : "Terjual"}{product.featured ? " · Featured" : ""}</small><small>{product.images?.length || 0} foto · {product.documents?.length || 0} dokumen · {product.seller_whatsapp ? "Seller WA aktif" : "WA admin"} · #{product.id}</small></div><div className="admin-list-actions"><button className="small-button" onClick={() => startEdit(product)}>Edit</button><button className="small-button" onClick={() => void toggleStatus(product)}>{product.status === "available" ? "Tandai terjual" : "Aktifkan stok"}</button><button className="small-button danger" onClick={() => void removeProduct(Number(product.id))}>Hapus</button></div></article>)}</div>}
           </section>
         </div>
       ) : tab === "testimonials" ? (

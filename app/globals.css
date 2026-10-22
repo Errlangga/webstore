@@ -594,3 +594,9 @@ body {
   .visual-upload-preview { aspect-ratio: 16 / 9; }
   .visual-upload-preview img { max-height: 200px; }
 }
+
+
+/* Jasa posting conversion link */
+.service-nav-link { color: #68caff; }
+.service-nav-link span { padding-left: 3px; color: var(--accent); font-size: 13px; }
+.service-nav-link:hover { color: #bde7ff; }
