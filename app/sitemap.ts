@@ -4,7 +4,7 @@ import { getProducts } from "@/lib/data";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://fc-mobile-store-efasa.vercel.app").replace(/\/$/, "");
+  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://fc-mobile-store.vercel.app").replace(/\/$/, "");
   const products = await getProducts({ availableOnly: true });
   return [
     { url: baseUrl, changeFrequency: "weekly", priority: 1 },
