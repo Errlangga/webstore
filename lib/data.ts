@@ -50,16 +50,41 @@ export async function getTestimonials(visibleOnly = true): Promise<Testimonial[]
 }
 
 
-export type StoreSettings = { whatsapp_number: string };
+export type StoreSettings = {
+  whatsapp_number: string;
+  hero_card_image_1: string;
+  hero_card_image_2: string;
+  fc_mobile_logo_image: string;
+};
+
+const EMPTY_STORE_SETTINGS: StoreSettings = {
+  whatsapp_number: "",
+  hero_card_image_1: "",
+  hero_card_image_2: "",
+  fc_mobile_logo_image: "",
+};
 
 export async function getStoreSettings(): Promise<StoreSettings> {
-  if (!process.env.DATABASE_URL) return { whatsapp_number: "" };
+  if (!process.env.DATABASE_URL) return EMPTY_STORE_SETTINGS;
   try {
     const sql = getDb();
-    const rows = await sql`SELECT value FROM store_settings WHERE key = 'whatsapp_number' LIMIT 1`;
-    return { whatsapp_number: typeof rows[0]?.value === "string" ? rows[0].value : "" };
+    const rows = await sql`
+      SELECT key, value
+      FROM store_settings
+      WHERE key IN ('whatsapp_number', 'hero_card_image_1', 'hero_card_image_2', 'fc_mobile_logo_image')
+    `;
+    const values: Record<string, string> = {};
+    for (const row of rows) {
+      if (typeof row.key === "string" && typeof row.value === "string") values[row.key] = row.value;
+    }
+    return {
+      whatsapp_number: values.whatsapp_number || "",
+      hero_card_image_1: values.hero_card_image_1 || "",
+      hero_card_image_2: values.hero_card_image_2 || "",
+      fc_mobile_logo_image: values.fc_mobile_logo_image || "",
+    };
   } catch (error) {
     console.error("Failed to load store settings:", error);
-    return { whatsapp_number: "" };
+    return EMPTY_STORE_SETTINGS;
   }
 }
