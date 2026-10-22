@@ -19,6 +19,7 @@ await sql`
     description TEXT NOT NULL DEFAULT '',
     category VARCHAR(80) NOT NULL DEFAULT 'Akun FC Mobile',
     players TEXT NOT NULL DEFAULT '',
+    seller_whatsapp TEXT NOT NULL DEFAULT '',
     images JSONB NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(images) = 'array'),
     documents JSONB NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(documents) = 'array'),
     status VARCHAR(20) NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'sold')),
@@ -28,6 +29,7 @@ await sql`
   )
 `;
 await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS documents JSONB NOT NULL DEFAULT '[]'::jsonb`;
+await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS seller_whatsapp TEXT NOT NULL DEFAULT ''`;
 await sql`CREATE INDEX IF NOT EXISTS products_status_created_idx ON products (status, created_at DESC)`;
 await sql`CREATE INDEX IF NOT EXISTS products_featured_idx ON products (featured) WHERE featured = true`;
 await sql`
@@ -42,7 +44,7 @@ await sql`
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )
 `;
-await sql`CREATE INDEX IF NOT EXISTS testimonials_visible_created_idx ON testimonials (visible, created_at DESC)`
+await sql`CREATE INDEX IF NOT EXISTS testimonials_visible_created_idx ON testimonials (visible, created_at DESC)`;
 await sql`
   CREATE TABLE IF NOT EXISTS store_settings (
     key VARCHAR(80) PRIMARY KEY,
@@ -51,10 +53,18 @@ await sql`
   )
 `;
 await sql`
+  CREATE TABLE IF NOT EXISTS admin_login_attempts (
+    id BIGSERIAL PRIMARY KEY,
+    fingerprint CHAR(64) NOT NULL,
+    attempted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`;
+await sql`CREATE INDEX IF NOT EXISTS admin_login_attempts_fingerprint_time_idx ON admin_login_attempts (fingerprint, attempted_at DESC)`;
+await sql`
   CREATE TABLE IF NOT EXISTS admin_credentials (
     id SMALLINT PRIMARY KEY CHECK (id = 1),
     password_hash TEXT NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )
 `;
-console.log("Neon schema ready: products, testimonials, admin credentials, store settings.");
+console.log("Neon schema ready: products, seller contacts, testimonials, admin credentials, login rate limits, and store settings.");
