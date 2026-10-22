@@ -30,7 +30,12 @@ async function recordAttemptAndCheckLimit(fingerprint: string) {
   const attempts = Number(rows[0]?.attempts || 0);
   if (attempts <= MAX_ATTEMPTS) return { limited: false, retryAfter: 0 };
 
-  const oldest = rows[0]?.oldest ? new Date(rows[0].oldest as string | Date).getTime() : Date.now();
+  const oldestValue = rows[0]?.oldest;
+  const oldest = oldestValue instanceof Date
+    ? oldestValue.getTime()
+    : oldestValue
+      ? new Date(String(oldestValue)).getTime()
+      : Date.now();
   const retryAfter = Math.max(1, Math.ceil((oldest + WINDOW_MINUTES * 60_000 - Date.now()) / 1000));
   return { limited: true, retryAfter };
 }
