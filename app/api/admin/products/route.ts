@@ -32,7 +32,7 @@ function validateProduct(body: Record<string, unknown>) {
         url: item.url.slice(0, 2048),
         name: item.name.trim().replace(/[\\/]/g, "-").slice(0, 160),
         contentType: typeof item.contentType === "string" ? item.contentType.slice(0, 120) : "application/octet-stream",
-        size: Number.isFinite(item.size) ? Math.max(0, Math.min(Number(item.size), 8 * 1024 * 1024)) : 0,
+        size: Number.isFinite(item.size) ? Math.max(0, Math.min(Number(item.size), 4 * 1024 * 1024)) : 0,
       }))
     : [];
   if (title.length < 3) return { error: "Judul produk minimal 3 karakter." } as const;
