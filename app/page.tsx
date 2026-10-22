@@ -18,12 +18,12 @@ export default async function HomePage() {
           <div className="hero-actions"><Link href="/stock" className="button button-primary">Jelajahi katalog <span>↗</span></Link><Link href="/testimoni" className="button button-ghost">Lihat testimoni <span>→</span></Link></div>
           <div className="hero-proof"><div className="proof-avatars"><span>AS</span><span>FC</span><span>+</span></div><span>Info transparan, komunikasi langsung<br /><b>ke admin store</b></span></div>
         </div>
-        <div className="hero-visual" aria-label="Kartu pemain FC Mobile Jude Bellingham dan Kylian Mbappé">
+        <div className="hero-visual" aria-label="Foto kartu pemain FC Mobile">
           <div className="hero-stadium-glow" />
           <div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" />
           <div className="hero-label label-top"><span>ASTRA MARKET</span><b>FC MOBILE PLAYER MARKET / 01</b></div>
-          <img className="hero-player-card hero-player-bellingham" src={storeSettings.hero_card_image_1 || "/fc-mobile-card-bellingham.webp"} alt="Kartu FC Mobile Jude Bellingham" loading="eager" />
-          <img className="hero-player-card hero-player-mbappe" src={storeSettings.hero_card_image_2 || "/fc-mobile-card-mbappe.webp"} alt="Kartu FC Mobile Kylian Mbappé" loading="eager" />
+          <img className="hero-player-card hero-player-bellingham" src={storeSettings.hero_card_image_1 || "/fc-mobile-card-bellingham.webp"} alt="Foto kartu pemain FC Mobile pertama" loading="eager" />
+          <img className="hero-player-card hero-player-mbappe" src={storeSettings.hero_card_image_2 || "/fc-mobile-card-mbappe.webp"} alt="Foto kartu pemain FC Mobile kedua" loading="eager" />
           <div className="float-note float-rating"><span className="note-dot" /><div><small>PLAYER MARKET</small><b>Squad up.</b></div></div>
           <div className="float-note float-bottom"><span className="float-icon">↗</span><div><small>MADE FOR PLAYERS</small><b>Find your next star.</b></div></div>
           <div className="hero-label label-bottom"><b>FC MOBILE / 01</b><span>THE TRANSFER ROOM</span></div>
