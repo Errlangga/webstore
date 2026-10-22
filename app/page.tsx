@@ -10,6 +10,7 @@ export default async function HomePage() {
     <div className="home-page">
       <section className="hero section-shell">
         <div className="hero-copy">
+          <img className="fc-mobile-logo" src="/fc-mobile-logo.svg" alt="EA SPORTS FC Mobile" width="250" height="64" />
           <div className="eyebrow"><span className="eyebrow-dot" /> FC MOBILE ACCOUNT MARKETPLACE <span className="eyebrow-line" /></div>
           <h1>BUILD YOUR<br /><span>NEXT SQUAD.</span></h1>
           <p className="hero-subtitle">Akun yang tepat. Skuad impian. Main dengan gaya lo sendiri.</p>
@@ -17,14 +18,15 @@ export default async function HomePage() {
           <div className="hero-actions"><Link href="/stock" className="button button-primary">Jelajahi katalog <span>↗</span></Link><Link href="/testimoni" className="button button-ghost">Lihat testimoni <span>→</span></Link></div>
           <div className="hero-proof"><div className="proof-avatars"><span>AS</span><span>FC</span><span>+</span></div><span>Info transparan, komunikasi langsung<br /><b>ke admin store</b></span></div>
         </div>
-        <div className="hero-visual" aria-label="Ilustrasi kartu sepak bola">
+        <div className="hero-visual" aria-label="Kartu pemain FC Mobile Jude Bellingham dan Kylian Mbappé">
+          <div className="hero-stadium-glow" />
           <div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" />
-          <div className="hero-label label-top"><span>ASTRA MARKET</span><b>PLAYER MARKET / 01</b></div>
-          <div className="hero-card hero-card-back"><span className="hero-card-mini">OVR</span><div className="hero-card-shape" /></div>
-          <div className="hero-card hero-card-front"><span className="card-edition">ULTIMATE COLLECTION</span><div className="hero-player-symbol">✦</div><strong>OVR</strong><span className="hero-rating">YOUR NEXT<br />STARTING XI</span><div className="hero-stats"><span>PACE <b>99</b></span><span>SKILL <b>★★★★★</b></span><span>VIBE <b>MAX</b></span></div></div>
-          <div className="float-note float-rating"><span className="note-dot" /><div><small>MARKET STATUS</small><b>Squad up.</b></div></div>
-          <div className="float-note float-bottom"><span className="float-icon">↗</span><div><small>MADE FOR PLAYERS</small><b>Find your OVR.</b></div></div>
-          <div className="hero-label label-bottom"><b>01 / 03</b><span>THE TRANSFER ROOM</span></div>
+          <div className="hero-label label-top"><span>ASTRA MARKET</span><b>FC MOBILE PLAYER MARKET / 01</b></div>
+          <img className="hero-player-card hero-player-bellingham" src="https://dszw1qtcnsa5e.cloudfront.net/community/20230903/1e18b9cc-0abb-4bac-a183-f848e735deba/%EB%B2%A8%EB%A7%81%EC%97%84.gif" alt="Kartu FC Mobile Jude Bellingham" loading="eager" />
+          <img className="hero-player-card hero-player-mbappe" src="https://tiermaker.com/images/media/hero_images/2024/945534/tierlist-toty-2026-fc-mobile-945534/9455341768586533.png" alt="Kartu FC Mobile Kylian Mbappé" loading="eager" />
+          <div className="float-note float-rating"><span className="note-dot" /><div><small>PLAYER MARKET</small><b>Squad up.</b></div></div>
+          <div className="float-note float-bottom"><span className="float-icon">↗</span><div><small>MADE FOR PLAYERS</small><b>Find your next star.</b></div></div>
+          <div className="hero-label label-bottom"><b>FC MOBILE / 01</b><span>THE TRANSFER ROOM</span></div>
         </div>
       </section>
 

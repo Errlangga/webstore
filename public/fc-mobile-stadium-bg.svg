@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#020716"/><stop offset=".48" stop-color="#061d42"/><stop offset="1" stop-color="#030b1c"/></linearGradient>
+  <radialGradient id="horizon"><stop stop-color="#146bd0" stop-opacity=".78"/><stop offset=".52" stop-color="#0b3d89" stop-opacity=".34"/><stop offset="1" stop-color="#06132f" stop-opacity="0"/></radialGradient>
+  <linearGradient id="pitch" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0a4383"/><stop offset="1" stop-color="#03142d"/></linearGradient>
+  <linearGradient id="roof" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#267fff" stop-opacity=".05"/><stop offset=".5" stop-color="#5bc8ff" stop-opacity=".5"/><stop offset="1" stop-color="#1545bd" stop-opacity=".08"/></linearGradient>
+  <filter id="blur"><feGaussianBlur stdDeviation="34"/></filter>
+  <pattern id="windows" width="32" height="22" patternUnits="userSpaceOnUse"><rect x="4" y="5" width="5" height="8" fill="#4db9ff" opacity=".5"/><rect x="17" y="3" width="4" height="6" fill="#bddfff" opacity=".28"/></pattern>
+</defs>
+<rect width="1600" height="900" fill="url(#sky)"/>
+<ellipse cx="800" cy="380" rx="730" ry="330" fill="url(#horizon)"/>
+<g opacity=".7" filter="url(#blur)" fill="#087cff"><ellipse cx="205" cy="435" rx="270" ry="100"/><ellipse cx="1320" cy="400" rx="310" ry="120"/><ellipse cx="800" cy="625" rx="420" ry="90"/></g>
+<!-- distant city -->
+<g fill="#06152e" stroke="#124783" stroke-width="1" opacity=".95">
+ <path d="M0 395V310h42v-30h33v88h26V338h32v-59h30v92h30V300h43v-49h26v145h35V320h46v77h30V281h40v121h27v-75h50v89h24v-122h33v-54h40v176h30V302h43v104h35v-67h50v-96h32v150h36V275h45v133h35v-82h37v75h44v-97h26v123h34V293h46v127h27v-88h48v73h35V290h40v113h34v-66h48v90h36V300h30v91h32V338h39v88h36v-119h40v100h45v-65h37v71h30v-88h38v90h38v-60h45v120H0Z"/>
+</g>
+<path d="M0 420V315H1600V430Z" fill="url(#windows)" opacity=".72"/>
+<!-- stadium roof arcs -->
+<path d="M-160 612Q800 -35 1760 612" fill="none" stroke="#0a2552" stroke-width="44" opacity=".85"/>
+<path d="M-150 598Q800 -30 1750 598" fill="none" stroke="#2a75dd" stroke-width="4" opacity=".72"/>
+<path d="M-130 625Q800 50 1730 625" fill="none" stroke="#9bddff" stroke-width="2" opacity=".7"/>
+<path d="M-65 665Q800 135 1665 665" fill="none" stroke="url(#roof)" stroke-width="95" opacity=".9"/>
+<!-- floodlights -->
+<g fill="#e7f7ff">
+ <circle cx="115" cy="386" r="5"/><circle cx="142" cy="376" r="4"/><circle cx="170" cy="365" r="5"/><circle cx="199" cy="353" r="4"/><circle cx="229" cy="344" r="5"/>
+ <circle cx="1370" cy="347" r="5"/><circle cx="1400" cy="359" r="4"/><circle cx="1432" cy="371" r="5"/><circle cx="1464" cy="384" r="4"/><circle cx="1494" cy="395" r="5"/>
+</g>
+<g stroke="#64caff" stroke-width="3" opacity=".4" filter="url(#blur)"><path d="M100 388 390 610"/><path d="M1490 395 1200 600"/></g>
+<!-- tiers and crowd -->
+<path d="M0 430Q800 200 1600 430V690Q800 525 0 690Z" fill="#07172e" stroke="#15559c" stroke-width="3"/>
+<path d="M0 464Q800 260 1600 464" fill="none" stroke="#1e7cdb" stroke-width="3"/>
+<path d="M0 506Q800 310 1600 506" fill="none" stroke="#318ce8" stroke-width="2" opacity=".65"/>
+<path d="M0 549Q800 365 1600 549" fill="none" stroke="#58bbff" stroke-width="2" opacity=".6"/>
+<path d="M0 590Q800 425 1600 590" fill="none" stroke="#2378c4" stroke-width="2" opacity=".5"/>
+<path d="M0 630Q800 480 1600 630" fill="none" stroke="#2378c4" stroke-width="2" opacity=".45"/>
+<g fill="#2b9cff" opacity=".5">
+ <circle cx="90" cy="470" r="3"/><circle cx="125" cy="454" r="2"/><circle cx="170" cy="485" r="3"/><circle cx="240" cy="465" r="2"/><circle cx="320" cy="492" r="3"/><circle cx="380" cy="455" r="2"/><circle cx="465" cy="478" r="3"/><circle cx="560" cy="440" r="2"/><circle cx="635" cy="468" r="3"/><circle cx="723" cy="433" r="2"/><circle cx="810" cy="464" r="3"/><circle cx="905" cy="445" r="2"/><circle cx="1000" cy="474" r="3"/><circle cx="1090" cy="450" r="2"/><circle cx="1180" cy="475" r="3"/><circle cx="1270" cy="443" r="2"/><circle cx="1360" cy="468" r="3"/><circle cx="1440" cy="452" r="2"/><circle cx="1510" cy="490" r="3"/>
+</g>
+<!-- pitch glow at stadium lower bowl -->
+<path d="M200 625 1400 625 1685 900 -85 900Z" fill="url(#pitch)" opacity=".95"/>
+<path d="M200 625 1400 625 1685 900 -85 900Z" fill="none" stroke="#1f9dff" stroke-width="3" opacity=".45"/>
+<path d="M800 627 800 900M200 625 0 900M1400 625 1600 900" stroke="#5cbdff" stroke-width="2" opacity=".18"/>
+<ellipse cx="800" cy="765" rx="260" ry="105" fill="none" stroke="#49baff" stroke-width="2" opacity=".17"/>
+<rect width="1600" height="900" fill="#020918" opacity=".36"/>
+</svg>
