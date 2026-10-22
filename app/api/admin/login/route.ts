@@ -4,14 +4,14 @@ import { createAdminSession, adminCookieName, verifyAdminPassword } from "@/lib/
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  if (!process.env.ADMIN_PASSWORD || !process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {
-    return NextResponse.json({ error: "Admin belum dikonfigurasi. Periksa ADMIN_PASSWORD dan SESSION_SECRET di environment." }, { status: 503 });
+  if (!process.env.DATABASE_URL || !process.env.ADMIN_PASSWORD) {
+    return NextResponse.json({ error: "Admin belum dikonfigurasi. Set DATABASE_URL dan ADMIN_PASSWORD di Vercel environment." }, { status: 503 });
   }
 
   try {
     const body = await request.json();
     const password = typeof body.password === "string" ? body.password : "";
-    if (!verifyAdminPassword(password)) {
+    if (!(await verifyAdminPassword(password))) {
       return NextResponse.json({ error: "Password tidak cocok." }, { status: 401 });
     }
 
