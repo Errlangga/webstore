@@ -56,13 +56,6 @@ export async function getStoreSettings(): Promise<StoreSettings> {
   if (!process.env.DATABASE_URL) return { whatsapp_number: "" };
   try {
     const sql = getDb();
-    await sql`
-      CREATE TABLE IF NOT EXISTS store_settings (
-        key VARCHAR(80) PRIMARY KEY,
-        value TEXT NOT NULL DEFAULT '',
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `;
     const rows = await sql`SELECT value FROM store_settings WHERE key = 'whatsapp_number' LIMIT 1`;
     return { whatsapp_number: typeof rows[0]?.value === "string" ? rows[0].value : "" };
   } catch (error) {
