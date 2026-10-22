@@ -34,7 +34,7 @@ export default function AdminLoginForm() {
   return (
     <div className="admin-login-wrap">
       <section className="admin-login-card">
-        <Link href="/" className="brand"><span className="brand-mark">OVR<span>+</span></span><span className="brand-copy"><b>OVR MARKET</b><small>STORE CONTROL / ADMIN</small></span></Link>
+        <Link href="/" className="brand"><span className="brand-mark">A<span>✦</span></span><span className="brand-copy"><b>ASTRA MARKET</b><small>STORE CONTROL / ADMIN</small></span></Link>
         <div className="eyebrow" style={{ marginTop: 31 }}><span className="eyebrow-dot" /> RESTRICTED AREA</div>
         <h1>Admin sign in.</h1>
         <p>Masuk untuk mengelola katalog akun, galeri foto, stok, dan testimoni yang tampil di store.</p>
