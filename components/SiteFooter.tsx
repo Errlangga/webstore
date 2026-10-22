@@ -5,8 +5,7 @@ export default function SiteFooter() {
     <footer className="site-footer">
       <div className="footer-top">
         <Link href="/" className="brand footer-brand">
-          <span className="brand-mark">A<span>✦</span></span>
-          <span className="brand-copy"><b>ASTRA MARKET</b><small>BUILT FOR YOUR NEXT SQUAD</small></span>
+          <img className="brand-logo footer-logo" src="/astra-market-logo.svg" alt="Astra Market FC Mobile" width="280" height="58" />
         </Link>
         <p>Katalog akun FC Mobile dengan informasi yang jelas dan proses yang simpel.</p>
         <div className="footer-links"><Link href="/stock">Katalog</Link><Link href="/testimoni">Testimoni</Link><Link href="/admin">Admin</Link></div>
