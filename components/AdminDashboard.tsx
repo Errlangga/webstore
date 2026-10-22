@@ -18,6 +18,8 @@ type ProductForm = {
   documents: ProductDocument[];
 };
 
+const ADMIN_DASHBOARD_PATH = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PATH || "/admin";
+
 const blankProduct: ProductForm = {
   title: "", price: "", description: "", category: "Akun FC Mobile",
   players: "", seller_whatsapp: "", status: "available", featured: false, images: [], documents: [],
@@ -74,7 +76,7 @@ export default function AdminDashboard() {
         fetch("/api/admin/settings", { cache: "no-store" }),
       ]);
       if (productResponse.status === 401 || testimonialResponse.status === 401 || settingsResponse.status === 401) {
-        router.replace("/admin/login");
+        router.replace(`${ADMIN_DASHBOARD_PATH}/login`);
         return;
       }
       const productData = await responseData(productResponse);
