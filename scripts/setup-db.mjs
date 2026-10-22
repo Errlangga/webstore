@@ -1,4 +1,7 @@
+import { loadEnvConfig } from "@next/env";
 import { neon } from "@neondatabase/serverless";
+
+loadEnvConfig(process.cwd());
 
 if (!process.env.DATABASE_URL) {
   console.error("DATABASE_URL belum diatur. Salin .env.example menjadi .env.local lalu isi connection string Neon.");
