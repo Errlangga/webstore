@@ -15,8 +15,7 @@ export default function SiteNav() {
     <header className="site-header">
       <div className="nav-wrap">
         <Link href="/" className="brand" aria-label="Astra Market FC Mobile beranda">
-          <span className="brand-mark">A<span>✦</span></span>
-          <span className="brand-copy"><b>ASTRA MARKET</b><small>FC MOBILE ACCOUNT STORE</small></span>
+          <img className="brand-logo" src="/astra-market-logo.svg" alt="Astra Market FC Mobile" width="280" height="58" />
         </Link>
         <nav className="main-nav" aria-label="Navigasi utama">
           {links.map((link) => (
