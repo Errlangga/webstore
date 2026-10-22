@@ -34,7 +34,7 @@ export default async function ProductDetailPage({ params }: Props) {
           <div className="price-panel"><span>HARGA YANG DITAWARKAN</span><strong>{formatRupiah(Number(product.price))}</strong><small>Harga dapat dikonfirmasi kembali ke admin sebelum transaksi.</small></div>
           {players.length > 0 && <div className="detail-spec"><h3>PLAYER HIGHLIGHTS</h3><div className="player-tags">{players.map((player) => <span key={player}>{player}</span>)}</div></div>}
           <div className="detail-spec"><h3>SEBELUM TRANSAKSI</h3><ul className="detail-checklist"><li>Periksa foto galeri dan detail akun.</li><li>Tanyakan informasi yang belum tercantum ke admin.</li><li>Konfirmasi keamanan, metode serah terima, dan harga.</li></ul></div>
-          {product.status === "available" ? <a className="button button-primary detail-order whatsapp-cta" href={orderLink} target="_blank" rel="noreferrer"><WhatsAppIcon /> <span>Chat admin via WhatsApp</span> <span className="whatsapp-arrow" aria-hidden="true">↗</span></a> : <button className="button button-disabled" disabled>Stok sudah terjual</button>}
+          {product.status === "available" ? <a className="button button-primary detail-order whatsapp-cta" href={orderLink} target="_blank" rel="noreferrer"><WhatsAppIcon className="whatsapp-icon" /> <span>Chat admin via WhatsApp</span> <span className="whatsapp-arrow" aria-hidden="true">↗</span></a> : <button className="button button-disabled" disabled>Stok sudah terjual</button>}
           <p className="detail-disclaimer">Astra Market FC Mobile adalah store independen. Pastikan seluruh ketentuan dan risiko transfer akun dipahami sebelum membeli.</p>
         </section>
       </div>
