@@ -240,7 +240,7 @@ export default function AdminDashboard() {
           <section className="admin-panel">
             <h2>{editingId ? "Edit akun" : "Tambah akun baru"}</h2>
             <form className="admin-form" onSubmit={saveProduct}>
-              <label className="form-field"><span>Nama akun / judul</span><input required minLength={3} maxLength={140} value={form.title} onChange={(e) => updateForm("title", e.target.value)} placeholder="Contoh: Squad OVR ล" /></label>
+              <label className="form-field"><span>Nama akun / judul</span><input required minLength={3} maxLength={140} value={form.title} onChange={(e) => updateForm("title", e.target.value)} placeholder="Contoh: Squad OVR 140+" /></label>
               <div className="form-row">
                 <label className="form-field"><span>Harga (Rupiah)</span><input required type="number" min="0" max="999999999999" step="1000" value={form.price} onChange={(e) => updateForm("price", e.target.value)} placeholder="350000" /></label>
                 <label className="form-field"><span>Kategori</span><select value={form.category} onChange={(e) => updateForm("category", e.target.value)}><option>Akun FC Mobile</option><option>Squad OVR Tinggi</option><option>Akun Budget</option><option>Akun Rare</option><option>Bundle / Lainnya</option></select></label>
