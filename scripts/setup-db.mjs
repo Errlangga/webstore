@@ -41,4 +41,11 @@ await sql`
   )
 `;
 await sql`CREATE INDEX IF NOT EXISTS testimonials_visible_created_idx ON testimonials (visible, created_at DESC)`;
-console.log("Neon schema ready: products, testimonials.");
+await sql`
+  CREATE TABLE IF NOT EXISTS admin_credentials (
+    id SMALLINT PRIMARY KEY CHECK (id = 1),
+    password_hash TEXT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`;
+console.log("Neon schema ready: products, testimonials, admin credentials.");

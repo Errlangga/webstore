@@ -31,7 +31,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const productFileRef = useRef<HTMLInputElement>(null);
   const proofFileRef = useRef<HTMLInputElement>(null);
-  const [tab, setTab] = useState<"products" | "testimonials">("products");
+  const [tab, setTab] = useState<"products" | "testimonials" | "security">("products");
   const [products, setProducts] = useState<Product[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [form, setForm] = useState<ProductForm>(blankProduct);
@@ -47,6 +47,9 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -216,6 +219,42 @@ export default function AdminDashboard() {
     }
   }
 
+  async function changePassword(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true); setError(""); setNotice("");
+    try {
+      const response = await fetch("/api/admin/password", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "change", currentPassword, newPassword, confirmPassword }),
+      });
+      const data = await responseData(response);
+      setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
+      setNotice(data.message || "Password berhasil diubah.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Password gagal diubah.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function resetPassword() {
+    if (!window.confirm("Reset password admin ke password awal yang dikonfigurasi di Vercel?")) return;
+    setBusy(true); setError(""); setNotice("");
+    try {
+      const response = await fetch("/api/admin/password", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reset" }),
+      });
+      const data = await responseData(response);
+      setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
+      setNotice(data.message || "Password dikembalikan ke password awal.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Password gagal direset.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
     router.replace("/admin/login");
@@ -233,6 +272,7 @@ export default function AdminDashboard() {
       <div className="admin-tabs" role="tablist">
         <button className={tab === "products" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("products"); setError(""); }} role="tab" aria-selected={tab === "products"}>Katalog akun ({products.length})</button>
         <button className={tab === "testimonials" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("testimonials"); setError(""); }} role="tab" aria-selected={tab === "testimonials"}>Testimoni ({testimonials.length})</button>
+        <button className={tab === "security" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("security"); setError(""); }} role="tab" aria-selected={tab === "security"}>Keamanan akun</button>
       </div>
 
       {loading ? <div className="admin-loading">Memuat data dashboard...</div> : tab === "products" ? (
@@ -261,7 +301,7 @@ export default function AdminDashboard() {
             {!products.length ? <div className="admin-empty">Belum ada akun. Tambahkan akun pertama melalui formulir ini.</div> : <div className="admin-list">{products.map((product) => <article className="admin-list-item" key={product.id}><div className="admin-list-thumb">{product.images?.[0] ? <img src={product.images[0]} alt="" /> : "OVR"}</div><div className="admin-list-info"><b>{product.title}</b><small>{formatRupiah(Number(product.price))} · {product.status === "available" ? "Tersedia" : "Terjual"}{product.featured ? " · Featured" : ""}</small><small>{product.images?.length || 0} foto · #{product.id}</small></div><div className="admin-list-actions"><button className="small-button" onClick={() => startEdit(product)}>Edit</button><button className="small-button" onClick={() => void toggleStatus(product)}>{product.status === "available" ? "Tandai terjual" : "Aktifkan stok"}</button><button className="small-button danger" onClick={() => void removeProduct(Number(product.id))}>Hapus</button></div></article>)}</div>}
           </section>
         </div>
-      ) : (
+      ) : tab === "testimonials" ? (
         <div className="admin-content-grid">
           <section className="admin-panel">
             <h2>Tambah testimoni</h2>
@@ -281,6 +321,25 @@ export default function AdminDashboard() {
           <section className="admin-panel">
             <h2>Feedback pembeli <span className="admin-badge">{testimonials.length} item</span></h2>
             {!testimonials.length ? <div className="admin-empty">Belum ada testimoni. Masukkan ulasan asli dan jangan membuat bukti transaksi palsu.</div> : <div className="admin-list">{testimonials.map((item) => <article className="admin-list-item" key={item.id}><div className="admin-list-thumb">{item.image_url ? <img src={item.image_url} alt="" /> : item.buyer_name.slice(0, 1).toUpperCase()}</div><div className="admin-list-info"><b>{item.buyer_name} · {"★".repeat(item.rating)}</b><small>{item.product_title}</small><small>{item.visible ? "Dipublikasikan" : "Disembunyikan"} · {item.message.slice(0, 75)}{item.message.length > 75 ? "…" : ""}</small></div><div className="admin-list-actions"><button className="small-button" onClick={() => void toggleTestimonial(item)}>{item.visible ? "Sembunyikan" : "Publikasikan"}</button><button className="small-button danger" onClick={() => void removeTestimonial(Number(item.id))}>Hapus</button></div></article>)}</div>}
+          </section>
+        </div>
+      ) : (
+        <div className="admin-content-grid">
+          <section className="admin-panel">
+            <h2>Ganti password admin</h2>
+            <p>Gunakan password unik yang tidak dipakai di akun lain. Password disimpan dalam bentuk hash di database.</p>
+            <form className="admin-form" onSubmit={changePassword}>
+              <label className="form-field"><span>Password saat ini</span><input required type="password" autoComplete="current-password" minLength={1} maxLength={128} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} /></label>
+              <label className="form-field"><span>Password baru</span><input required type="password" autoComplete="new-password" minLength={8} maxLength={128} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimal 8 karakter" /></label>
+              <label className="form-field"><span>Konfirmasi password baru</span><input required type="password" autoComplete="new-password" minLength={8} maxLength={128} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /></label>
+              <button type="submit" className="button button-primary" disabled={busy}>{busy ? "Menyimpan..." : "Ganti password"} <span>↗</span></button>
+            </form>
+          </section>
+          <section className="admin-panel">
+            <h2>Reset password admin</h2>
+            <p>Reset mengembalikan password ke password awal yang dikonfigurasi di Vercel.</p>
+            <button type="button" className="button button-secondary" onClick={() => void resetPassword()} disabled={busy}>Reset ke password awal</button>
+            <small className="form-hint">Gunakan opsi reset hanya bila diperlukan. Setelah reset, segera ganti lagi ke password pribadi.</small>
           </section>
         </div>
       )}
