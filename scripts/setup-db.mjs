@@ -143,10 +143,12 @@ await sql`
     file_kind VARCHAR(12) NOT NULL CHECK (file_kind IN ('image', 'document')),
     byte_size BIGINT NOT NULL DEFAULT 0 CHECK (byte_size >= 0),
     attached BOOLEAN NOT NULL DEFAULT false,
+    deleted BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CHECK ((uploader_type = 'admin' AND user_id IS NULL) OR (uploader_type = 'member' AND user_id IS NOT NULL))
   )
 `;
+await sql`ALTER TABLE catalog_uploads ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT false`;
 await sql`CREATE INDEX IF NOT EXISTS catalog_uploads_member_idx ON catalog_uploads (user_id, created_at DESC) WHERE uploader_type = 'member'`;
 await sql`CREATE INDEX IF NOT EXISTS catalog_uploads_capacity_idx ON catalog_uploads (uploader_type, user_id, attached, file_kind, created_at DESC)`;
 await sql`
