@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { whatsappUrl } from "@/lib/format";
 
@@ -13,10 +13,16 @@ const links = [
 
 export default function SiteNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [adminWhatsapp, setAdminWhatsapp] = useState("");
+  const [memberUsername, setMemberUsername] = useState("");
 
   useEffect(() => {
     let active = true;
+    fetch("/api/user/me", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => { if (active && typeof data?.user?.username === "string") setMemberUsername(data.user.username); })
+      .catch(() => {});
     fetch("/api/store-settings", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((data) => {
@@ -27,7 +33,7 @@ export default function SiteNav() {
   }, []);
 
   const postingUrl = whatsappUrl(
-    "Halo admin Astra Market FC Mobile, saya ingin menggunakan jasa posting. Boleh minta informasi syarat dan biayanya?",
+    "Halo admin Astra Market FC Mobile, saya ingin menggunakan jasa rekber / midman. Boleh minta informasi alur dan biayanya?",
     adminWhatsapp,
   );
   return (
@@ -42,9 +48,9 @@ export default function SiteNav() {
               {link.label}
             </Link>
           ))}
-          <a className="nav-link service-nav-link" href={postingUrl} target="_blank" rel="noreferrer">Jasa Posting <span aria-hidden="true">↗</span></a>
+          <a className="nav-link service-nav-link" href={postingUrl} target="_blank" rel="noreferrer">Jasa Rekber / Midman <span aria-hidden="true">↗</span></a>
         </nav>
-        <Link className="nav-cta" href="/stock">Cari akun <span aria-hidden="true">↗</span></Link>
+        <Link className="nav-cta" href={memberUsername ? "/my-katalog" : "/account"}>{memberUsername ? "@" + memberUsername : "Masuk / Daftar"} <span aria-hidden="true">↗</span></Link>
       </div>
     </header>
   );
