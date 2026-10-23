@@ -30,7 +30,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const players = product.players.split(",").map((item) => item.trim()).filter(Boolean);
   return (
     <div className="section-shell detail-page">
-      <div className="breadcrumb"><Link href="/">Beranda</Link><span>/</span><Link href="/stock">Katalog</Link><span>/</span><span>{product.title}</span></div>
+      <div className="breadcrumb"><Link href="/">Beranda</Link><span>/</span><Link href="/cari-akun">Cari Akun</Link><span>/</span><span>{product.title}</span></div>
       <div className="detail-layout">
         <ProductGallery images={product.images || []} title={product.title} />
         <section className="detail-info">
