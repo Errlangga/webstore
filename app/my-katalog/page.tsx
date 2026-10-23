@@ -11,6 +11,6 @@ export const metadata: Metadata = {
 
 export default async function MyCatalogPage() {
   const user = await getMarketUser();
-  if (!user) redirect("/account?mode=login");
+  if (!user) redirect("/account?mode=login&next=%2Fmy-katalog");
   return <MyCatalogDashboard username={user.username} />;
 }
