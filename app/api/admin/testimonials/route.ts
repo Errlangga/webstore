@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { assertOwnedBlobUrls, cleanupUnusedBlobUrls, markBlobUrlsAttached, testimonialFileUrls } from "@/lib/blob-security";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,12 +33,16 @@ export async function POST(request: Request) {
     if (buyer.length < 2 || product.length < 2 || message.length < 5 || !Number.isInteger(rating) || rating < 1 || rating > 5) {
       return NextResponse.json({ error: "Nama, produk, pesan, atau rating belum valid." }, { status: 400 });
     }
+    if (image && !(await assertOwnedBlobUrls([image], { type: "admin" }))) {
+      return NextResponse.json({ error: "Bukti transaksi harus diunggah melalui dashboard admin." }, { status: 400 });
+    }
     const sql = getDb();
     const rows = await sql`
       INSERT INTO testimonials (buyer_name, product_title, message, rating, image_url, visible)
       VALUES (${buyer}, ${product}, ${message}, ${rating}, ${image}, ${visible})
       RETURNING *
     `;
+    await markBlobUrlsAttached(testimonialFileUrls(rows[0].image_url), { type: "admin" });
     return NextResponse.json({ testimonial: rows[0] }, { status: 201 });
   } catch (error) {
     console.error("Testimonial create failed:", error);
@@ -72,8 +77,9 @@ export async function DELETE(request: Request) {
     const id = Number(body.id);
     if (!Number.isSafeInteger(id) || id <= 0) return NextResponse.json({ error: "ID testimoni tidak valid." }, { status: 400 });
     const sql = getDb();
-    const rows = await sql`DELETE FROM testimonials WHERE id = ${id} RETURNING id`;
+    const rows = await sql`DELETE FROM testimonials WHERE id = ${id} RETURNING image_url`;
     if (!rows.length) return NextResponse.json({ error: "Testimoni tidak ditemukan." }, { status: 404 });
+    await cleanupUnusedBlobUrls(testimonialFileUrls(rows[0].image_url));
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Testimonial delete failed:", error);
