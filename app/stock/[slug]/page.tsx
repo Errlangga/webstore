@@ -22,8 +22,9 @@ export default async function ProductDetailPage({ params }: Props) {
   if (!product) notFound();
   const storeSettings = await getStoreSettings();
   const hasSellerWhatsApp = Boolean(product.seller_whatsapp?.trim());
+  const listingRef = product.source === "member" ? `MEMBER-${Math.abs(product.id)}` : String(product.id);
   const contactMessage = hasSellerWhatsApp
-    ? `Halo seller, saya tertarik dengan akun: ${product.title} (ID katalog #${product.id}) dari Astra Market FC Mobile. Boleh minta info selengkapnya?`
+    ? `Halo seller, saya tertarik dengan akun: ${product.title} (ID katalog ${listingRef}) dari Astra Market FC Mobile. Boleh minta info selengkapnya?`
     : `Halo admin Astra Market FC Mobile, saya tertarik dengan akun: ${product.title} (ID katalog #${product.id}). Boleh minta info selengkapnya?`;
   const orderLink = whatsappUrl(contactMessage, hasSellerWhatsApp ? product.seller_whatsapp : storeSettings.whatsapp_number);
   const players = product.players.split(",").map((item) => item.trim()).filter(Boolean);
@@ -35,6 +36,7 @@ export default async function ProductDetailPage({ params }: Props) {
         <section className="detail-info">
           <div className="detail-tags"><span className="category-tag">{product.category || "Akun FC Mobile"}</span><span className={product.status === "available" ? "stock-text available" : "stock-text sold"}>{product.status === "available" ? "● STOK TERSEDIA" : "○ SUDAH TERJUAL"}</span></div>
           <h1>{product.title}</h1>
+          {product.seller_username && <p className="member-seller-tag">Dipasang oleh <strong>@{product.seller_username}</strong></p>}
           <p className="detail-description">{product.description || "Hubungi admin untuk mendapatkan informasi lebih lanjut mengenai akun ini."}</p>
           <div className="price-panel"><span>HARGA YANG DITAWARKAN</span><strong>{formatRupiah(Number(product.price))}</strong><small>Harga dapat dikonfirmasi kembali ke admin sebelum transaksi.</small></div>
           {players.length > 0 && <div className="detail-spec"><h3>PLAYER HIGHLIGHTS</h3><div className="player-tags">{players.map((player) => <span key={player}>{player}</span>)}</div></div>}
