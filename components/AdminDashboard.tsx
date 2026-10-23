@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { Product, ProductDocument, Testimonial, ProductStatus } from "@/lib/types";
 import { formatRupiah } from "@/lib/format";
 
