@@ -691,3 +691,20 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .account-access-card, .account-access-aside { animation: none !important; }
 }
+
+
+/* Cari Akun search, price filters and sort controls */
+.catalog-search-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(175px, 230px); align-items: end; gap: 12px; }
+.catalog-advanced-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.catalog-control { display: grid; gap: 7px; min-width: 0; color: var(--muted); }
+.catalog-control > span { font: 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.catalog-control input, .catalog-control select { box-sizing: border-box; width: 100%; min-height: 43px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 3px; color: var(--text); background: var(--panel); font: 11px var(--sans); outline: none; }
+.catalog-control input:focus, .catalog-control select:focus { border-color: var(--accent); }
+.catalog-control input::placeholder { color: var(--subtle); }
+.catalog-results-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: -8px 0 22px; color: var(--muted); font-size: 10px; }
+.catalog-results-row strong { color: var(--text); font-family: var(--mono); }
+.catalog-results-row button { border: 0; padding: 0; background: transparent; cursor: pointer; }
+@media (max-width: 760px) {
+  .catalog-search-row, .catalog-advanced-filters { grid-template-columns: minmax(0, 1fr); }
+  .catalog-results-row { margin-top: -5px; }
+}
