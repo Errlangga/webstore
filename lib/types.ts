@@ -11,6 +11,8 @@ export type Product = {
   category: string;
   players: string;
   seller_whatsapp: string;
+  seller_username?: string;
+  source?: "member" | "admin";
   images: string[];
   documents: ProductDocument[];
   status: ProductStatus;

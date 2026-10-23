@@ -6,7 +6,7 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 
 export const metadata: Metadata = {
   title: { default: "Astra Market FC Mobile", template: "%s | Astra Market FC Mobile" },
-  description: "Temukan akun FC Mobile pilihanmu. Katalog transparan, detail lengkap, dan transaksi langsung dengan admin.",
+  description: "Marketplace akun FC Mobile komunitas. Buat katalog sendiri, hubungi seller, dan tanya admin tentang jasa rekber / midman.",
   applicationName: "Astra Market FC Mobile",
   robots: { index: true, follow: true },
 };

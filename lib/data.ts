@@ -3,20 +3,45 @@ import type { Product, Testimonial } from "@/lib/types";
 
 export async function getProducts(options: { featured?: boolean; availableOnly?: boolean } = {}): Promise<Product[]> {
   if (!process.env.DATABASE_URL) return [];
+  const sql = getDb();
   try {
-    const sql = getDb();
-    const featured = options.featured;
-    const availableOnly = options.availableOnly;
-    if (featured && availableOnly) {
+    if (options.featured) {
       return await sql`SELECT * FROM products WHERE featured = true AND status = 'available' ORDER BY created_at DESC LIMIT 6` as Product[];
     }
-    if (featured) {
-      return await sql`SELECT * FROM products WHERE featured = true ORDER BY created_at DESC LIMIT 6` as Product[];
+    const adminRows = options.availableOnly
+      ? await sql`SELECT * FROM products WHERE status = 'available' ORDER BY created_at DESC`
+      : await sql`SELECT * FROM products ORDER BY created_at DESC`;
+    let memberRows: Record<string, unknown>[] = [];
+    try {
+      memberRows = options.availableOnly
+        ? await sql`
+            SELECT (-c.id)::bigint AS id, c.title, c.slug, c.price, c.description, c.category,
+              c.players, c.seller_whatsapp, c.images, c.documents, c.status, false AS featured,
+              c.created_at, c.updated_at, u.username AS seller_username, 'member' AS source
+            FROM user_catalogs c JOIN user_accounts u ON u.id = c.user_id
+            WHERE c.status = 'available' ORDER BY c.created_at DESC
+          `
+        : await sql`
+            SELECT (-c.id)::bigint AS id, c.title, c.slug, c.price, c.description, c.category,
+              c.players, c.seller_whatsapp, c.images, c.documents, c.status, false AS featured,
+              c.created_at, c.updated_at, u.username AS seller_username, 'member' AS source
+            FROM user_catalogs c JOIN user_accounts u ON u.id = c.user_id
+            ORDER BY c.created_at DESC
+          `;
+    } catch (error) {
+      console.error("Failed to load member catalogs:", error);
     }
-    if (availableOnly) {
-      return await sql`SELECT * FROM products WHERE status = 'available' ORDER BY created_at DESC` as Product[];
-    }
-    return await sql`SELECT * FROM products ORDER BY created_at DESC` as Product[];
+    const members = memberRows.map((row) => ({
+      ...row,
+      id: Number(row.id),
+      price: Number(row.price),
+      seller_username: String(row.seller_username || ""),
+      source: "member" as const,
+      images: Array.isArray(row.images) ? row.images as Product["images"] : [],
+      documents: Array.isArray(row.documents) ? row.documents as Product["documents"] : [],
+      featured: false,
+    })) as Product[];
+    return [...adminRows as Product[], ...members].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   } catch (error) {
     console.error("Failed to load products:", error);
     return [];
@@ -28,7 +53,27 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   try {
     const sql = getDb();
     const rows = await sql`SELECT * FROM products WHERE slug = ${slug} LIMIT 1` as Product[];
-    return rows[0] ?? null;
+    if (rows[0]) return rows[0];
+    const memberRows = await sql`
+      SELECT (-c.id)::bigint AS id, c.title, c.slug, c.price, c.description, c.category,
+        c.players, c.seller_whatsapp, c.images, c.documents, c.status, false AS featured,
+        c.created_at, c.updated_at, u.username AS seller_username, 'member' AS source
+      FROM user_catalogs c JOIN user_accounts u ON u.id = c.user_id
+      WHERE c.slug = ${slug}
+      LIMIT 1
+    `;
+    const row = memberRows[0];
+    if (!row) return null;
+    return {
+      ...row,
+      id: Number(row.id),
+      price: Number(row.price),
+      seller_username: String(row.seller_username || ""),
+      source: "member",
+      images: Array.isArray(row.images) ? row.images as Product["images"] : [],
+      documents: Array.isArray(row.documents) ? row.documents as Product["documents"] : [],
+      featured: false,
+    } as Product;
   } catch (error) {
     console.error("Failed to load product:", error);
     return null;

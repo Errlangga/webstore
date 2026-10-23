@@ -67,4 +67,70 @@ await sql`
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )
 `;
-console.log("Neon schema ready: products, seller contacts, testimonials, admin credentials, login rate limits, and store settings.");
+await sql`
+  CREATE TABLE IF NOT EXISTS user_accounts (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(24) NOT NULL,
+    username_normalized VARCHAR(24) NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT user_accounts_username_shape CHECK (username ~ '^[A-Za-z0-9_.-]{3,24}
+)
+  )
+`;
+await sql`
+  CREATE TABLE IF NOT EXISTS user_catalogs (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES user_accounts(id) ON DELETE CASCADE,
+    title VARCHAR(140) NOT NULL,
+    slug VARCHAR(190) NOT NULL UNIQUE,
+    price BIGINT NOT NULL CHECK (price >= 0),
+    description TEXT NOT NULL DEFAULT '',
+    category VARCHAR(80) NOT NULL DEFAULT 'Akun FC Mobile',
+    players TEXT NOT NULL DEFAULT '',
+    seller_whatsapp TEXT NOT NULL DEFAULT '',
+    images JSONB NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(images) = 'array'),
+    documents JSONB NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(documents) = 'array'),
+    status VARCHAR(20) NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'sold')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`;
+await sql`CREATE INDEX IF NOT EXISTS user_catalogs_user_created_idx ON user_catalogs (user_id, created_at DESC)`;
+await sql`CREATE INDEX IF NOT EXISTS user_catalogs_status_created_idx ON user_catalogs (status, created_at DESC)`;
+await sql`
+  CREATE TABLE IF NOT EXISTS user_auth_attempts (
+    id BIGSERIAL PRIMARY KEY,
+    fingerprint CHAR(64) NOT NULL,
+    action VARCHAR(20) NOT NULL,
+    attempted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`;
+await sql`CREATE INDEX IF NOT EXISTS user_auth_attempts_window_idx ON user_auth_attempts (fingerprint, action, attempted_at DESC)`;
+await sql`
+  CREATE OR REPLACE FUNCTION enforce_three_catalogs_per_user()
+  RETURNS trigger
+  LANGUAGE plpgsql
+  AS $function$
+  DECLARE
+    existing_count INTEGER;
+  BEGIN
+    PERFORM pg_advisory_xact_lock(NEW.user_id);
+    SELECT COUNT(*) INTO existing_count
+    FROM user_catalogs
+    WHERE user_id = NEW.user_id AND id <> COALESCE(NEW.id, 0);
+    IF existing_count >= 3 THEN
+      RAISE EXCEPTION 'USER_CATALOG_LIMIT' USING ERRCODE = '23514';
+    END IF;
+    RETURN NEW;
+  END;
+  $function$
+`;
+await sql`DROP TRIGGER IF EXISTS user_catalog_limit_guard ON user_catalogs`;
+await sql`
+  CREATE TRIGGER user_catalog_limit_guard
+  BEFORE INSERT OR UPDATE OF user_id ON user_catalogs
+  FOR EACH ROW EXECUTE FUNCTION enforce_three_catalogs_per_user()
+`;
+console.log("Neon schema ready: admin, store settings, member accounts, member catalogs (max 3), login throttling, and testimonials.");

@@ -10,6 +10,9 @@ Astra Market FC Mobile account storefront built with Next.js App Router, Neon Po
 - Each catalog item can optionally specify a seller WhatsApp number; otherwise enquiries route to the store admin.
 - Admin route prefix is configurable; direct `/admin` paths return 404 in production and the dashboard still requires a valid signed session.
 - Admin login attempts are rate-limited to five attempts per IP fingerprint per 15-minute window.
+- Member accounts use salted scrypt password hashes and signed HTTP-only sessions.
+- Members can publish, edit, or delete up to 3 catalog listings per account; their listings appear in the public marketplace and WhatsApp contact routes to the seller.
+- “Jasa Rekber / Midman” opens a prefilled WhatsApp message to store admin; it is a contact flow, not an automated escrow/payment processor.
 - Up to 10 public document attachments per listing (PDF, TXT, CSV, DOC/DOCX, XLS/XLSX, PPTX), 4 MB each.
 
 ## Local setup
@@ -17,6 +20,10 @@ Astra Market FC Mobile account storefront built with Next.js App Router, Neon Po
 2. Copy `.env.example` to `.env.local` and fill in the variables.
 3. Create the schema using `npm run db:setup` (requires `DATABASE_URL`).
 4. Run `npm run dev`.
+
+## Member accounts
+- First-time visitors to the homepage are sent to `/account` to register or log in. Usernames are unique and 3–24 characters; passwords must be 8–128 characters. Password recovery is not automatic, so members should keep their credentials safe.
+- Members manage their own listings at `/my-katalog`. The limit of three listings is checked by the API and a database trigger.
 
 ## Required environment variables
 - `DATABASE_URL`: Neon pooled or standard Postgres connection string.

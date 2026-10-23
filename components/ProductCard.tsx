@@ -15,7 +15,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <span className="cover-arrow" aria-hidden="true">↗</span>
       </Link>
       <div className="product-content">
-        <div className="product-meta"><span>{product.category || "Akun FC Mobile"}</span><span>{product.players ? product.players.split(",").length + " pemain unggulan" : "Detail akun"}</span></div>
+        <div className="product-meta"><span>{product.category || "Akun FC Mobile"}</span><span>{product.seller_username ? "Seller @" + product.seller_username : product.players ? product.players.split(",").length + " pemain unggulan" : "Detail akun"}</span></div>
         <Link href={`/stock/${product.slug}`} className="product-title">{product.title}</Link>
         <p className="product-description">{product.description || "Hubungi admin untuk info lengkap akun ini."}</p>
         <div className="product-bottom"><div><small>HARGA</small><strong>{formatRupiah(Number(product.price))}</strong></div><Link href={`/stock/${product.slug}`} className="text-link">Lihat detail <span>→</span></Link></div>
