@@ -6,7 +6,7 @@ Astra Market FC Mobile account storefront built with Next.js App Router, Neon Po
 - Responsive landing page, public Cari Akun catalogue, product detail pages, and Testimoni Rekber.
 - Password-protected admin dashboard for products, seller WhatsApp contacts, multi-image galleries, stock status, testimonials, visual settings, and account security (change/reset password).
 - Product photos stored in Vercel Blob; product data stored in Neon.
-- “Jasa Posting” CTA opens WhatsApp admin with a prefilled request message.
+- “Jasa Rekber / Midman” CTA opens WhatsApp admin with a prefilled request message.
 - Each catalog item can optionally specify a seller WhatsApp number; otherwise enquiries route to the store admin.
 - Admin route prefix is configurable; direct `/admin` paths return 404 in production and the dashboard still requires a valid signed session.
 - Admin login attempts are rate-limited to five attempts per IP fingerprint per 15-minute window.
