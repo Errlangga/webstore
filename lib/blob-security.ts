@@ -40,12 +40,13 @@ export async function validateUploadFile(file: File, kind: UploadKind): Promise<
 
   const extension = file.name.split(".").pop()?.toLowerCase() || "";
   if (!EXTENSION_MIMES[extension]?.has(mime)) return "Ekstensi file tidak cocok dengan format file yang diizinkan.";
-  const bytes = Buffer.from(await file.slice(0, Math.min(file.size, 64)).arrayBuffer());
+  const contents = Buffer.from(await file.arrayBuffer());
+  const bytes = contents.subarray(0, 64);
   const isPng = bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
   const isJpeg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
   const isWebp = bytes.length >= 12 && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP";
   const isAvif = bytes.length >= 12 && bytes.toString("ascii", 4, 8) === "ftyp" &&
-    ["avif", "avis", "mif1"].includes(bytes.toString("ascii", 8, 12));
+    ["avif", "avis"].includes(bytes.toString("ascii", 8, 12));
   const isPdf = bytes.subarray(0, 5).toString("ascii") === "%PDF-";
   const isOle = bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]));
   const isZip = bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04;
@@ -60,12 +61,17 @@ export async function validateUploadFile(file: File, kind: UploadKind): Promise<
     return isOle ? null : "Isi file tidak cocok dengan format Office yang dipilih.";
   }
   if (mime.startsWith("application/vnd.openxmlformats-officedocument.")) {
-    return isZip ? null : "Isi file tidak cocok dengan format Office yang dipilih.";
+    if (!isZip) return "Isi file tidak cocok dengan format Office yang dipilih.";
+    const zipNames = contents.toString("latin1");
+    const expectedEntry = mime.includes("wordprocessingml") ? "word/document.xml"
+      : mime.includes("spreadsheetml") ? "xl/workbook.xml"
+      : "ppt/presentation.xml";
+    return zipNames.includes("[Content_Types].xml") && zipNames.includes(expectedEntry)
+      ? null : "Struktur dokumen Office tidak valid.";
   }
   if (mime === "text/plain" || mime === "text/csv" || mime === "application/csv") {
-    const text = await file.text();
-    if (text.includes("\u0000")) return "File teks tidak boleh berisi data biner.";
-    try { new TextEncoder().encode(new TextDecoder("utf-8", { fatal: true }).decode(new TextEncoder().encode(text))); }
+    if (contents.includes(0)) return "File teks tidak boleh berisi data biner.";
+    try { new TextDecoder("utf-8", { fatal: true }).decode(contents); }
     catch { return "File teks harus menggunakan encoding UTF-8."; }
     return null;
   }
@@ -115,7 +121,7 @@ export async function assertOwnedBlobUrls(
 }
 
 export async function markBlobUrlsAttached(urls: string[], owner: BlobOwner) {
-  const uniqueUrls = Array.from(new Set(urls.filter((url) => url.startsWith("https://")));
+  const uniqueUrls = Array.from(new Set(urls.filter((url) => url.startsWith("https://"))));
   if (!uniqueUrls.length) return;
   const sql = getDb();
   if (owner.type === "admin") {
