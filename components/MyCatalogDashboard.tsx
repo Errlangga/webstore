@@ -172,7 +172,11 @@ export default function MyCatalogDashboard({ username }: { username: string }) {
           <h1>Halo, <span>{username}.</span></h1>
           <p>Kelola listing akun FC Mobile kamu. Maksimal 3 katalog aktif per akun.</p>
         </div>
-        <div className="member-head-actions"><Link href="/stock" className="button button-ghost">Lihat marketplace ↗</Link><button type="button" className="small-button" onClick={logout}>Logout</button></div>
+        <div className="member-head-actions">
+          <Link href="/cari-akun" className="button button-ghost">Cari akun ↗</Link>
+          <button type="button" className="button button-primary" onClick={() => document.getElementById("member-catalog-form")?.scrollIntoView({ behavior: "smooth", block: "start" })}>＋ Buat katalog</button>
+          <button type="button" className="small-button" onClick={logout}>Logout</button>
+        </div>
       </div>
       <div className="member-catalog-stats">
         <div><strong>{catalogs.length}/3</strong><span>Slot katalog</span></div>
@@ -182,7 +186,7 @@ export default function MyCatalogDashboard({ username }: { username: string }) {
       {error && <div className="admin-alert error" role="alert">{error}</div>}
       {notice && <div className="admin-alert" role="status">{notice}</div>}
       <div className="member-catalog-layout">
-        <section className="admin-panel member-catalog-form-panel">
+        <section id="member-catalog-form" className="admin-panel member-catalog-form-panel">
           <div className="member-section-title"><div><span className="mini-label">{editingId ? "EDIT LISTING" : "BUAT LISTING BARU"}</span><h2>{editingId ? "Edit katalog" : "Katalog baru"}</h2></div><span className="admin-badge">{editingId ? "EDIT MODE" : `${Math.max(0, 3 - catalogs.length)} SLOT TERSISA`}</span></div>
           <form className="admin-form" onSubmit={save}>
             <label className="form-field"><span>Nama katalog / judul akun *</span><input required minLength={3} maxLength={140} value={form.title} onChange={(e) => updateForm("title", e.target.value)} placeholder="Contoh: Akun OVR 117 Full Event" /></label>
@@ -207,7 +211,7 @@ export default function MyCatalogDashboard({ username }: { username: string }) {
         <section className="member-catalog-list-panel">
           <div className="member-section-title"><div><span className="mini-label">YOUR LISTINGS</span><h2>My Katalog</h2></div><span className="admin-badge">{catalogs.length} / 3</span></div>
           {loading ? <div className="admin-loading">Memuat katalog kamu…</div> : catalogs.length === 0 ? (
-            <div className="admin-empty"><strong>Belum ada katalog.</strong><br />Buat katalog pertamamu melalui form ini. Listing akan ditampilkan di marketplace.</div>
+            <div className="admin-empty"><strong>Belum ada katalog.</strong><br />Buat katalog pertamamu melalui form ini. Listing yang berstatus Tersedia akan tampil di halaman Cari Akun.</div>
           ) : (
             <div className="admin-list">{catalogs.map((item) => (
               <article className="admin-list-item member-list-item" key={item.id}>
