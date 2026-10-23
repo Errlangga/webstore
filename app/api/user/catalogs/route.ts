@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import { slugify } from "@/lib/format";
 import { getMarketUser } from "@/lib/user-auth";
 import { validateUserCatalog } from "@/lib/user-catalog";
+import { assertOwnedBlobUrls, catalogFileUrls, markBlobUrlsAttached } from "@/lib/blob-security";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,6 +39,10 @@ export async function POST(request: Request) {
       : { error: "Format data katalog tidak valid." } as const;
     if ("error" in validated) return NextResponse.json({ error: validated.error }, { status: 400 });
     const product = validated.value;
+    const fileUrls = catalogFileUrls(product.images, product.documents);
+    if (!(await assertOwnedBlobUrls(fileUrls, { type: "member", userId: user.id }))) {
+      return NextResponse.json({ error: "Gunakan file yang diunggah dari akun kamu sendiri." }, { status: 400 });
+    }
     const sql = getDb();
     const countRows = await sql`SELECT COUNT(*)::int AS total FROM user_catalogs WHERE user_id = ${user.id}`;
     if (Number(countRows[0]?.total || 0) >= 3) {
@@ -54,6 +59,7 @@ export async function POST(request: Request) {
       )
       RETURNING id, user_id, title, slug, price, description, category, players, seller_whatsapp, images, documents, status, created_at, updated_at
     `;
+    await markBlobUrlsAttached(fileUrls, { type: "member", userId: user.id });
     return NextResponse.json({ catalog: { ...rows[0], id: Number(rows[0].id), price: Number(rows[0].price) }, limit: 3 }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
