@@ -29,6 +29,7 @@ export async function GET() {
     const listings = [...adminRows, ...memberRows]
       .map((row) => ({
         ...row,
+        created_at: String(row.created_at),
         id: Number(row.id),
         price: Number(row.price),
         source: row.source === "member" ? "member" : "admin",
