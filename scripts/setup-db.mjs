@@ -199,4 +199,16 @@ await sql`
   ON CONFLICT (blob_url) DO NOTHING
 `;
 
-console.log("Neon schema ready: admin, store settings, member accounts, member catalogs, upload registry/quotas, and testimonials.");
+
+await sql`
+  CREATE TABLE IF NOT EXISTS user_device_bindings (
+    device_hash CHAR(64) PRIMARY KEY,
+    user_id BIGINT REFERENCES user_accounts(id) ON DELETE SET NULL,
+    bound_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`;
+await sql`CREATE INDEX IF NOT EXISTS user_device_bindings_user_idx ON user_device_bindings (user_id) WHERE user_id IS NOT NULL`;
+
+console.log("Neon schema ready: admin, store settings, member accounts, device-bound member registrations, member catalogs, upload registry/quotas, and testimonials.");
