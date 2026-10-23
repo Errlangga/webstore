@@ -151,7 +151,7 @@ await sql`CREATE INDEX IF NOT EXISTS catalog_uploads_member_idx ON catalog_uploa
 await sql`CREATE INDEX IF NOT EXISTS catalog_uploads_capacity_idx ON catalog_uploads (uploader_type, user_id, attached, file_kind, created_at DESC)`;
 await sql`
   INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
-  SELECT DISTINCT image.url, 'member', c.user_id, 'image', 0, true
+  SELECT DISTINCT image.url, 'member'::varchar, c.user_id, 'image'::varchar, 0::bigint, true
   FROM user_catalogs c
   CROSS JOIN LATERAL jsonb_array_elements_text(c.images) image(url)
   WHERE image.url LIKE 'https://%.blob.vercel-storage.com/%'
@@ -159,7 +159,7 @@ await sql`
 `;
 await sql`
   INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
-  SELECT DISTINCT doc.item->>'url', 'member', c.user_id, 'document', 0, true
+  SELECT DISTINCT doc.item->>'url', 'member'::varchar, c.user_id, 'document'::varchar, 0::bigint, true
   FROM user_catalogs c
   CROSS JOIN LATERAL jsonb_array_elements(c.documents) doc(item)
   WHERE doc.item->>'url' LIKE 'https://%.blob.vercel-storage.com/%'
@@ -167,7 +167,7 @@ await sql`
 `;
 await sql`
   INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
-  SELECT DISTINCT image.url, 'admin', NULL, 'image', 0, true
+  SELECT DISTINCT image.url, 'admin'::varchar, NULL::bigint, 'image'::varchar, 0::bigint, true
   FROM products p
   CROSS JOIN LATERAL jsonb_array_elements_text(p.images) image(url)
   WHERE image.url LIKE 'https://%.blob.vercel-storage.com/%'
@@ -175,7 +175,7 @@ await sql`
 `;
 await sql`
   INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
-  SELECT DISTINCT doc.item->>'url', 'admin', NULL, 'document', 0, true
+  SELECT DISTINCT doc.item->>'url', 'admin'::varchar, NULL::bigint, 'document'::varchar, 0::bigint, true
   FROM products p
   CROSS JOIN LATERAL jsonb_array_elements(p.documents) doc(item)
   WHERE doc.item->>'url' LIKE 'https://%.blob.vercel-storage.com/%'
@@ -183,14 +183,14 @@ await sql`
 `;
 await sql`
   INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
-  SELECT DISTINCT image_url, 'admin', NULL, 'image', 0, true
+  SELECT DISTINCT image_url, 'admin'::varchar, NULL::bigint, 'image'::varchar, 0::bigint, true
   FROM testimonials
   WHERE image_url LIKE 'https://%.blob.vercel-storage.com/%'
   ON CONFLICT (blob_url) DO NOTHING
 `;
 await sql`
   INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
-  SELECT DISTINCT value, 'admin', NULL, 'image', 0, true
+  SELECT DISTINCT value, 'admin'::varchar, NULL::bigint, 'image'::varchar, 0::bigint, true
   FROM store_settings
   WHERE key IN ('hero_card_image_1', 'hero_card_image_2', 'fc_mobile_logo_image')
     AND value LIKE 'https://%.blob.vercel-storage.com/%'
