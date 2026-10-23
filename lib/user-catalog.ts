@@ -48,8 +48,8 @@ export function validateUserCatalog(body: Record<string, unknown>) {
   if (title.length < 3) return { error: "Judul katalog minimal 3 karakter." } as const;
   if (!Number.isFinite(price) || price < 0 || price > 999999999999) return { error: "Harga tidak valid." } as const;
   if (description.length < 5) return { error: "Deskripsi katalog minimal 5 karakter." } as const;
-  if (sellerRaw && (seller_whatsapp.length < 8 || seller_whatsapp.length > 15)) {
-    return { error: "Nomor WhatsApp seller harus 8–15 digit internasional, misalnya 6281234567890." } as const;
+  if (seller_whatsapp.length < 8 || seller_whatsapp.length > 15) {
+    return { error: "Nomor WhatsApp seller wajib diisi dengan 8–15 digit internasional, misalnya 6281234567890." } as const;
   }
   if (Array.isArray(body.images) && body.images.length > 10) return { error: "Maksimal 10 foto per katalog." } as const;
   if (Array.isArray(body.documents) && body.documents.length > 10) return { error: "Maksimal 10 dokumen per katalog." } as const;
