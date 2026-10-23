@@ -1,4 +1,5 @@
 import {
+  createHash,
   createHmac,
   randomBytes,
   scrypt as scryptCallback,
@@ -8,7 +9,9 @@ import { cookies } from "next/headers";
 import { getDb } from "@/lib/db";
 
 const COOKIE_NAME = "astra_market_user";
+const DEVICE_COOKIE_NAME = "astra_market_device";
 const SESSION_AGE_SECONDS = 60 * 60 * 24 * 14;
+const DEVICE_AGE_SECONDS = 60 * 60 * 24 * 365;
 const HASH_BYTES = 64;
 
 export type MarketUser = { id: number; username: string; created_at: string };
@@ -55,6 +58,85 @@ function sessionSecret() {
 
 function sign(payload: string) {
   return createHmac("sha256", sessionSecret()).update(payload).digest("base64url");
+}
+
+
+export function createMarketDeviceToken() {
+  return randomBytes(32).toString("base64url");
+}
+
+export async function getMarketDeviceToken(): Promise<string | null> {
+  try {
+    const jar = await cookies();
+    const value = jar.get(DEVICE_COOKIE_NAME)?.value;
+    return value && /^[A-Za-z0-9_-]{43}$/.test(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+export function marketDeviceCookieName() {
+  return DEVICE_COOKIE_NAME;
+}
+
+export function marketDeviceCookieMaxAge() {
+  return DEVICE_AGE_SECONDS;
+}
+
+export function hashMarketDeviceToken(token: string) {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+export async function getMarketDeviceBinding(deviceHash: string) {
+  const sql = getDb();
+  const rows = await sql`
+    SELECT binding.user_id, account.username
+    FROM user_device_bindings binding
+    LEFT JOIN user_accounts account ON account.id = binding.user_id
+    WHERE binding.device_hash = ${deviceHash}
+    LIMIT 1
+  `;
+  if (!rows.length) return null;
+  return {
+    userId: rows[0].user_id === null ? null : Number(rows[0].user_id),
+    username: typeof rows[0].username === "string" ? rows[0].username : null,
+  };
+}
+
+export async function reserveMarketDevice(deviceHash: string) {
+  const sql = getDb();
+  const rows = await sql`
+    INSERT INTO user_device_bindings (device_hash, user_id)
+    VALUES (${deviceHash}, NULL)
+    ON CONFLICT (device_hash) DO NOTHING
+    RETURNING device_hash
+  `;
+  return rows.length > 0;
+}
+
+export async function bindMarketDevice(deviceHash: string, userId: number) {
+  const sql = getDb();
+  const updated = await sql`
+    UPDATE user_device_bindings
+    SET user_id = ${userId}, bound_at = COALESCE(bound_at, NOW()), last_seen_at = NOW()
+    WHERE device_hash = ${deviceHash} AND (user_id IS NULL OR user_id = ${userId})
+    RETURNING user_id
+  `;
+  if (updated.length) return true;
+  const inserted = await sql`
+    INSERT INTO user_device_bindings (device_hash, user_id, bound_at, last_seen_at)
+    VALUES (${deviceHash}, ${userId}, NOW(), NOW())
+    ON CONFLICT (device_hash) DO NOTHING
+    RETURNING user_id
+  `;
+  if (inserted.length) return true;
+  const binding = await getMarketDeviceBinding(deviceHash);
+  return binding?.userId === userId;
+}
+
+export async function releaseUnboundMarketDevice(deviceHash: string) {
+  const sql = getDb();
+  await sql`DELETE FROM user_device_bindings WHERE device_hash = ${deviceHash} AND user_id IS NULL`;
 }
 
 export function normalizeUsername(value: unknown) {
