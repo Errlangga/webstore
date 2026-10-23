@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { slugify } from "@/lib/format";
+import { assertOwnedBlobUrls, catalogFileUrls, cleanupUnusedBlobUrls, markBlobUrlsAttached } from "@/lib/blob-security";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,6 +67,10 @@ export async function POST(request: Request) {
     const body = await request.json() as Record<string, unknown>;
     const product = validateProduct(body);
     if ("error" in product) return NextResponse.json({ error: product.error }, { status: 400 });
+    const fileUrls = catalogFileUrls(product.images, product.documents);
+    if (!(await assertOwnedBlobUrls(fileUrls, { type: "admin" }))) {
+      return NextResponse.json({ error: "Gunakan file yang diunggah melalui dashboard admin." }, { status: 400 });
+    }
     const sql = getDb();
     const baseSlug = slugify(product.title) || "akun-fc-mobile";
     const existing = await sql`SELECT id FROM products WHERE slug = ${baseSlug} LIMIT 1`;
@@ -75,6 +80,7 @@ export async function POST(request: Request) {
       VALUES (${product.title}, ${slug}, ${product.price}, ${product.description}, ${product.category}, ${product.players}, ${product.seller_whatsapp}, ${JSON.stringify(product.images)}::jsonb, ${JSON.stringify(product.documents)}::jsonb, ${product.status}, ${product.featured})
       RETURNING *
     `;
+    await markBlobUrlsAttached(fileUrls, { type: "admin" });
     return NextResponse.json({ product: rows[0] }, { status: 201 });
   } catch (error) {
     console.error("Product create failed:", error);
@@ -92,8 +98,13 @@ export async function PUT(request: Request) {
     const product = validateProduct(body);
     if ("error" in product) return NextResponse.json({ error: product.error }, { status: 400 });
     const sql = getDb();
-    const currentRows = await sql`SELECT slug FROM products WHERE id = ${id} LIMIT 1`;
+    const currentRows = await sql`SELECT slug, images, documents FROM products WHERE id = ${id} LIMIT 1`;
     if (!currentRows.length) return NextResponse.json({ error: "Produk tidak ditemukan." }, { status: 404 });
+    const previousUrls = catalogFileUrls(currentRows[0].images, currentRows[0].documents);
+    const nextUrls = catalogFileUrls(product.images, product.documents);
+    if (!(await assertOwnedBlobUrls(nextUrls, { type: "admin" }, previousUrls))) {
+      return NextResponse.json({ error: "Gunakan file yang diunggah melalui dashboard admin." }, { status: 400 });
+    }
     const currentSlug = String(currentRows[0].slug);
     let slug = currentSlug;
     const nextBaseSlug = slugify(product.title) || "akun-fc-mobile";
@@ -109,6 +120,8 @@ export async function PUT(request: Request) {
         featured = ${product.featured}, updated_at = NOW()
       WHERE id = ${id} RETURNING *
     `;
+    await markBlobUrlsAttached(nextUrls, { type: "admin" });
+    await cleanupUnusedBlobUrls(previousUrls.filter((url) => !nextUrls.includes(url)));
     return NextResponse.json({ product: rows[0] });
   } catch (error) {
     console.error("Product update failed:", error);
@@ -124,8 +137,9 @@ export async function DELETE(request: Request) {
     const id = Number(body.id);
     if (!Number.isSafeInteger(id) || id <= 0) return NextResponse.json({ error: "ID produk tidak valid." }, { status: 400 });
     const sql = getDb();
-    const rows = await sql`DELETE FROM products WHERE id = ${id} RETURNING id`;
+    const rows = await sql`DELETE FROM products WHERE id = ${id} RETURNING images, documents`;
     if (!rows.length) return NextResponse.json({ error: "Produk tidak ditemukan." }, { status: 404 });
+    await cleanupUnusedBlobUrls(catalogFileUrls(rows[0].images, rows[0].documents));
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Product delete failed:", error);
