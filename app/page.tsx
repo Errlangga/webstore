@@ -17,7 +17,7 @@ export default async function HomePage() {
           <div className="eyebrow"><span className="eyebrow-dot" /> FC MOBILE ACCOUNT MARKETPLACE <span className="eyebrow-line" /></div>
           <h1>BUILD YOUR<br /><span>NEXT SQUAD.</span></h1>
           <p className="hero-subtitle">Akun yang tepat. Skuad impian. Main dengan gaya lo sendiri.</p>
-          <p className="hero-text">Jelajahi koleksi akun FC Mobile dengan detail yang jelas, galeri foto dari admin, dan proses transaksi langsung.</p>
+          <p className="hero-text">Jelajahi katalog akun dari admin dan seller komunitas. Buat listing milikmu sendiri, atur kontak seller, lalu komunikasikan transaksi secara langsung.</p>
           <div className="hero-actions"><Link href="/stock" className="button button-primary">Jelajahi katalog <span>↗</span></Link><Link href="/testimoni" className="button button-ghost">Lihat testimoni <span>→</span></Link></div>
           <div className="hero-proof"><div className="proof-avatars"><span>AS</span><span>FC</span><span>+</span></div><span>Info transparan, komunikasi langsung<br /><b>ke admin store</b></span></div>
         </div>
@@ -36,7 +36,7 @@ export default async function HomePage() {
       <section className="trust-strip"><div><span className="trust-number">01</span><b>Detail transparan</b><small>Spesifikasi & harga jelas</small></div><div><span className="trust-number">02</span><b>Galeri akun</b><small>Foto dari admin store</small></div><div><span className="trust-number">03</span><b>Kontak langsung</b><small>Diskusi sebelum deal</small></div><div><span className="trust-number">04</span><b>Update stok</b><small>Label tersedia / terjual</small></div></section>
 
       <section className="section-shell section-block">
-        <div className="section-heading"><div><div className="eyebrow">THE TRANSFER ROOM <span className="eyebrow-line" /></div><h2>Featured <span>accounts.</span></h2><p>Pilihan akun yang ditandai admin sebagai unggulan.</p></div><Link href="/stock" className="text-link">Semua katalog <span>↗</span></Link></div>
+        <div className="section-heading"><div><div className="eyebrow">THE TRANSFER ROOM <span className="eyebrow-line" /></div><h2>Featured <span>accounts.</span></h2><p>Pilihan akun yang ditandai admin sebagai unggulan. Katalog member tersedia di halaman marketplace.</p></div><Link href="/stock" className="text-link">Semua katalog <span>↗</span></Link></div>
         {products.length ? <div className="product-grid">{products.slice(0, 3).map((product) => <ProductCard key={product.id} product={product} />)}</div> : <div className="featured-empty"><div className="featured-empty-mark">A<span>✦</span></div><div><span className="mini-label">NEXT UP</span><h3>Slot featured siap diisi.</h3><p>Admin bisa menambahkan akun, foto katalog, harga, dan menandai produk unggulan lewat dashboard.</p></div><Link href="/stock" className="button button-secondary">Buka katalog <span>→</span></Link></div>}
       </section>
 
