@@ -18,7 +18,8 @@ export default function WhatsAppFloat() {
     return () => { active = false; };
   }, []);
 
-  if (pathname.startsWith("/admin")) return null;
+  const privateAdminPath = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PATH || "";
+  if (pathname.startsWith("/admin") || pathname.startsWith("/account") || pathname.startsWith("/my-katalog") || (privateAdminPath && pathname.startsWith(privateAdminPath))) return null;
 
   const href = whatsappUrl("Halo admin Astra Market FC Mobile, saya ingin bertanya tentang akun FC Mobile.", whatsappNumber);
 
