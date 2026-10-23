@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getMarketUser } from "@/lib/user-auth";
 import ProductCard from "@/components/ProductCard";
 import { getProducts, getTestimonials, getStoreSettings } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  if (!(await getMarketUser())) redirect("/account");
   const [products, testimonials, storeSettings] = await Promise.all([getProducts({ featured: true, availableOnly: true }), getTestimonials(true), getStoreSettings()]);
   return (
     <div className="home-page">
