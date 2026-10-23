@@ -1,4 +1,5 @@
 import {
+  createHash,
   createHmac,
   randomBytes,
   scrypt as scryptCallback,
@@ -83,7 +84,7 @@ export function marketDeviceCookieMaxAge() {
 }
 
 export function hashMarketDeviceToken(token: string) {
-  return createHmac("sha256", sessionSecret()).update(`astra-market-device:${token}`).digest("hex");
+  return createHash("sha256").update(token).digest("hex");
 }
 
 export async function getMarketDeviceBinding(deviceHash: string) {
