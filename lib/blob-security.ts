@@ -107,14 +107,14 @@ export async function assertOwnedBlobUrls(
         SELECT requested.url
         FROM jsonb_array_elements_text(${JSON.stringify(requested)}::jsonb) AS requested(url)
         LEFT JOIN catalog_uploads upload ON upload.blob_url = requested.url
-          AND upload.uploader_type = 'admin' AND upload.user_id IS NULL
+          AND upload.uploader_type = 'admin' AND upload.user_id IS NULL AND upload.deleted = false
         WHERE upload.id IS NULL LIMIT 1
       `
     : await sql`
         SELECT requested.url
         FROM jsonb_array_elements_text(${JSON.stringify(requested)}::jsonb) AS requested(url)
         LEFT JOIN catalog_uploads upload ON upload.blob_url = requested.url
-          AND upload.uploader_type = 'member' AND upload.user_id = ${owner.userId}
+          AND upload.uploader_type = 'member' AND upload.user_id = ${owner.userId} AND upload.deleted = false
         WHERE upload.id IS NULL LIMIT 1
       `;
   return unmatched.length === 0;
@@ -127,13 +127,13 @@ export async function markBlobUrlsAttached(urls: string[], owner: BlobOwner) {
   if (owner.type === "admin") {
     await sql`
       UPDATE catalog_uploads SET attached = true
-      WHERE uploader_type = 'admin' AND user_id IS NULL
+      WHERE uploader_type = 'admin' AND user_id IS NULL AND deleted = false
         AND blob_url IN (SELECT jsonb_array_elements_text(${JSON.stringify(uniqueUrls)}::jsonb))
     `;
   } else {
     await sql`
       UPDATE catalog_uploads SET attached = true
-      WHERE uploader_type = 'member' AND user_id = ${owner.userId}
+      WHERE uploader_type = 'member' AND user_id = ${owner.userId} AND deleted = false
         AND blob_url IN (SELECT jsonb_array_elements_text(${JSON.stringify(uniqueUrls)}::jsonb))
     `;
   }
@@ -144,9 +144,9 @@ export async function checkUploadCapacity(owner: BlobOwner, kind: UploadKind, ne
   const rows = owner.type === "admin"
     ? await sql`
         SELECT
-          COUNT(*) FILTER (WHERE attached AND file_kind = 'image')::int AS image_count,
-          COUNT(*) FILTER (WHERE attached AND file_kind = 'document')::int AS document_count,
-          COALESCE(SUM(byte_size) FILTER (WHERE attached), 0)::bigint AS storage_bytes,
+          COUNT(*) FILTER (WHERE NOT deleted AND attached AND file_kind = 'image')::int AS image_count,
+          COUNT(*) FILTER (WHERE NOT deleted AND attached AND file_kind = 'document')::int AS document_count,
+          COALESCE(SUM(byte_size) FILTER (WHERE NOT deleted AND attached), 0)::bigint AS storage_bytes,
           COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '24 hours')::int AS daily_count,
           COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '15 minutes')::int AS recent_count
         FROM catalog_uploads WHERE uploader_type = 'admin' AND user_id IS NULL
@@ -204,7 +204,7 @@ export async function cleanupUnusedBlobUrls(urls: string[]) {
       `;
       if (references[0]?.used) continue;
       await del(url);
-      await sql`DELETE FROM catalog_uploads WHERE blob_url = ${url}`;
+      await sql`UPDATE catalog_uploads SET attached = false, deleted = true WHERE blob_url = ${url}`;
     } catch (error) {
       console.error("Blob cleanup failed:", error);
     }
@@ -214,7 +214,7 @@ export async function cleanupUnusedBlobUrls(urls: string[]) {
 export async function cleanupExpiredPendingUploads(owner: BlobOwner) {
   const sql = getDb();
   const rows = owner.type === "admin"
-    ? await sql`SELECT blob_url FROM catalog_uploads WHERE uploader_type = 'admin' AND user_id IS NULL AND attached = false AND created_at < NOW() - INTERVAL '1 hour' ORDER BY created_at ASC LIMIT 50`
+    ? await sql`SELECT blob_url FROM catalog_uploads WHERE uploader_type = 'admin' AND user_id IS NULL AND attached = false AND deleted = false AND created_at < NOW() - INTERVAL '1 hour' ORDER BY created_at ASC LIMIT 50`
     : await sql`SELECT blob_url FROM catalog_uploads WHERE uploader_type = 'member' AND user_id = ${owner.userId} AND attached = false AND created_at < NOW() - INTERVAL '1 hour' ORDER BY created_at ASC LIMIT 50`;
   if (rows.length) await cleanupUnusedBlobUrls(rows.map((row) => String(row.blob_url)));
 }
