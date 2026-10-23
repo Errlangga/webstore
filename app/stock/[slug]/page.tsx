@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { getMarketUser } from "@/lib/user-auth";
 import ProductGallery from "@/components/ProductGallery";
 import { getProductBySlug, getStoreSettings } from "@/lib/data";
 import { formatRupiah, whatsappUrl } from "@/lib/format";
@@ -12,12 +13,14 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  if (!(await getMarketUser())) return { title: "Login untuk melihat akun", robots: { index: false, follow: false } };
   const product = await getProductBySlug(slug);
   return { title: product ? product.title : "Detail akun" };
 }
 
 export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params;
+  if (!(await getMarketUser())) redirect(`/account?mode=login&next=${encodeURIComponent(`/stock/${slug}`)}`);
   const product = await getProductBySlug(slug);
   if (!product) notFound();
   const storeSettings = await getStoreSettings();

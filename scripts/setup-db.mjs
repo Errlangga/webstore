@@ -133,4 +133,70 @@ await sql`
   BEFORE INSERT OR UPDATE OF user_id ON user_catalogs
   FOR EACH ROW EXECUTE FUNCTION enforce_three_catalogs_per_user()
 `;
-console.log("Neon schema ready: admin, store settings, member accounts, member catalogs (max 3), login throttling, and testimonials.");
+
+await sql`
+  CREATE TABLE IF NOT EXISTS catalog_uploads (
+    id BIGSERIAL PRIMARY KEY,
+    blob_url TEXT NOT NULL UNIQUE,
+    uploader_type VARCHAR(12) NOT NULL CHECK (uploader_type IN ('admin', 'member')),
+    user_id BIGINT REFERENCES user_accounts(id) ON DELETE CASCADE,
+    file_kind VARCHAR(12) NOT NULL CHECK (file_kind IN ('image', 'document')),
+    byte_size BIGINT NOT NULL DEFAULT 0 CHECK (byte_size >= 0),
+    attached BOOLEAN NOT NULL DEFAULT false,
+    deleted BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CHECK ((uploader_type = 'admin' AND user_id IS NULL) OR (uploader_type = 'member' AND user_id IS NOT NULL))
+  )
+`;
+await sql`ALTER TABLE catalog_uploads ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT false`;
+await sql`CREATE INDEX IF NOT EXISTS catalog_uploads_member_idx ON catalog_uploads (user_id, created_at DESC) WHERE uploader_type = 'member'`;
+await sql`CREATE INDEX IF NOT EXISTS catalog_uploads_capacity_idx ON catalog_uploads (uploader_type, user_id, attached, file_kind, created_at DESC)`;
+await sql`
+  INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
+  SELECT DISTINCT image.url, 'member'::varchar, c.user_id, 'image'::varchar, 0::bigint, true
+  FROM user_catalogs c
+  CROSS JOIN LATERAL jsonb_array_elements_text(c.images) image(url)
+  WHERE image.url LIKE 'https://%.blob.vercel-storage.com/%'
+  ON CONFLICT (blob_url) DO NOTHING
+`;
+await sql`
+  INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
+  SELECT DISTINCT doc.item->>'url', 'member'::varchar, c.user_id, 'document'::varchar, 0::bigint, true
+  FROM user_catalogs c
+  CROSS JOIN LATERAL jsonb_array_elements(c.documents) doc(item)
+  WHERE doc.item->>'url' LIKE 'https://%.blob.vercel-storage.com/%'
+  ON CONFLICT (blob_url) DO NOTHING
+`;
+await sql`
+  INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
+  SELECT DISTINCT image.url, 'admin'::varchar, NULL::bigint, 'image'::varchar, 0::bigint, true
+  FROM products p
+  CROSS JOIN LATERAL jsonb_array_elements_text(p.images) image(url)
+  WHERE image.url LIKE 'https://%.blob.vercel-storage.com/%'
+  ON CONFLICT (blob_url) DO NOTHING
+`;
+await sql`
+  INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
+  SELECT DISTINCT doc.item->>'url', 'admin'::varchar, NULL::bigint, 'document'::varchar, 0::bigint, true
+  FROM products p
+  CROSS JOIN LATERAL jsonb_array_elements(p.documents) doc(item)
+  WHERE doc.item->>'url' LIKE 'https://%.blob.vercel-storage.com/%'
+  ON CONFLICT (blob_url) DO NOTHING
+`;
+await sql`
+  INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
+  SELECT DISTINCT image_url, 'admin'::varchar, NULL::bigint, 'image'::varchar, 0::bigint, true
+  FROM testimonials
+  WHERE image_url LIKE 'https://%.blob.vercel-storage.com/%'
+  ON CONFLICT (blob_url) DO NOTHING
+`;
+await sql`
+  INSERT INTO catalog_uploads (blob_url, uploader_type, user_id, file_kind, byte_size, attached)
+  SELECT DISTINCT value, 'admin'::varchar, NULL::bigint, 'image'::varchar, 0::bigint, true
+  FROM store_settings
+  WHERE key IN ('hero_card_image_1', 'hero_card_image_2', 'fc_mobile_logo_image')
+    AND value LIKE 'https://%.blob.vercel-storage.com/%'
+  ON CONFLICT (blob_url) DO NOTHING
+`;
+
+console.log("Neon schema ready: admin, store settings, member accounts, member catalogs, upload registry/quotas, and testimonials.");

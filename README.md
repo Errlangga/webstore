@@ -13,7 +13,7 @@ Astra Market FC Mobile account storefront built with Next.js App Router, Neon Po
 - Member accounts use salted scrypt password hashes and signed HTTP-only sessions. Navigation separates the public `/cari-akun` marketplace from the private-per-member `/my-katalog` management page.
 - Members can create, edit, or delete up to 3 catalog listings per account from the prominent Buat Katalog action in `/my-katalog`; only listings with available stock appear on `/cari-akun`, and WhatsApp contact routes to the seller.
 - “Jasa Rekber / Midman” opens a prefilled WhatsApp message to store admin; it is a contact flow, not an automated escrow/payment processor.
-- Up to 10 public document attachments per listing (PDF, TXT, CSV, DOC/DOCX, XLS/XLSX, PPTX), 4 MB each.
+- Up to 10 public document attachments and 10 images per listing (PDF, TXT, CSV, DOC/DOCX, XLS/XLSX, PPTX), 4 MB each. Uploads are checked by extension, MIME type, file signature, ownership, and storage quotas; unused files are cleaned up when listings change or are deleted.
 
 ## Local setup
 1. Install Node.js 20.9+ and run `npm install`.
@@ -23,7 +23,7 @@ Astra Market FC Mobile account storefront built with Next.js App Router, Neon Po
 
 ## Member accounts
 - First-time visitors to the homepage are sent to `/account` to register or log in. Usernames are unique and 3–24 characters; passwords must be 8–128 characters. Password recovery is not automatic, so members should keep their credentials safe.
-- Members manage their own listings at `/my-katalog`. The limit of three listings is checked by the API and a database trigger.
+- Members manage their own listings at `/my-katalog`. The limit of three listings is checked by the API and a database trigger. Members must be logged in to browse `/cari-akun` and view `/stock/[slug]`; the requested page is restored after login. Public catalog and detail routes are excluded from the sitemap while login-gated.
 
 ## Required environment variables
 - `DATABASE_URL`: Neon pooled or standard Postgres connection string.

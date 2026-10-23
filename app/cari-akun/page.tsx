@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getMarketUser } from "@/lib/user-auth";
 import StockGrid from "@/components/StockGrid";
 import { getProducts } from "@/lib/data";
 
@@ -6,9 +8,11 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Cari Akun FC Mobile",
   description: "Cari dan bandingkan akun FC Mobile yang tersedia dari Astra Market dan seller komunitas.",
+  robots: { index: false, follow: false, noarchive: true },
 };
 
 export default async function CariAkunPage() {
+  if (!(await getMarketUser())) redirect("/account?mode=login&next=%2Fcari-akun");
   const products = await getProducts({ availableOnly: true });
   const memberListings = products.filter((product) => product.source === "member").length;
   return (

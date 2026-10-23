@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getMarketUser } from "@/lib/user-auth";
 import { validateUserCatalog } from "@/lib/user-catalog";
+import { assertOwnedBlobUrls, catalogFileUrls, cleanupUnusedBlobUrls, markBlobUrlsAttached } from "@/lib/blob-security";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,6 +32,13 @@ export async function PUT(request: Request, context: Context) {
     if ("error" in validated) return NextResponse.json({ error: validated.error }, { status: 400 });
     const p = validated.value;
     const sql = getDb();
+    const previousRows = await sql`SELECT images, documents FROM user_catalogs WHERE id = ${identity.id} AND user_id = ${identity.userId} LIMIT 1`;
+    if (!previousRows.length) return NextResponse.json({ error: "Katalog tidak ditemukan atau bukan milik akun kamu." }, { status: 404 });
+    const previousUrls = catalogFileUrls(previousRows[0].images, previousRows[0].documents);
+    const nextUrls = catalogFileUrls(p.images, p.documents);
+    if (!(await assertOwnedBlobUrls(nextUrls, { type: "member", userId: user.id }, previousUrls))) {
+      return NextResponse.json({ error: "Gunakan file yang diunggah dari akun kamu sendiri." }, { status: 400 });
+    }
     const rows = await sql`
       UPDATE user_catalogs SET
         title = ${p.title},
@@ -47,6 +55,8 @@ export async function PUT(request: Request, context: Context) {
       RETURNING id, user_id, title, slug, price, description, category, players, seller_whatsapp, images, documents, status, created_at, updated_at
     `;
     if (!rows.length) return NextResponse.json({ error: "Katalog tidak ditemukan atau bukan milik akun kamu." }, { status: 404 });
+    await markBlobUrlsAttached(nextUrls, { type: "member", userId: user.id });
+    await cleanupUnusedBlobUrls(previousUrls.filter((url) => !nextUrls.includes(url)));
     return NextResponse.json({ catalog: { ...rows[0], id: Number(rows[0].id), price: Number(rows[0].price) } }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("User catalog update failed:", error);
@@ -61,8 +71,9 @@ export async function DELETE(_request: Request, context: Context) {
   if (!identity) return NextResponse.json({ error: "ID katalog tidak valid." }, { status: 400 });
   try {
     const sql = getDb();
-    const rows = await sql`DELETE FROM user_catalogs WHERE id = ${identity.id} AND user_id = ${identity.userId} RETURNING id`;
+    const rows = await sql`DELETE FROM user_catalogs WHERE id = ${identity.id} AND user_id = ${identity.userId} RETURNING images, documents`;
     if (!rows.length) return NextResponse.json({ error: "Katalog tidak ditemukan atau bukan milik akun kamu." }, { status: 404 });
+    await cleanupUnusedBlobUrls(catalogFileUrls(rows[0].images, rows[0].documents));
     return NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("User catalog delete failed:", error);

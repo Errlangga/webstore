@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { assertOwnedBlobUrls, cleanupUnusedBlobUrls, markBlobUrlsAttached } from "@/lib/blob-security";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -89,6 +90,13 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Tidak ada pengaturan yang dikirim." }, { status: 400 });
     }
 
+    const previous = await readSettings();
+    const newImageUrls = IMAGE_SETTING_KEYS.map((key) => updates[key]).filter((value): value is string => typeof value === "string" && value.startsWith("https://"));
+    const legacyUrls = IMAGE_SETTING_KEYS.map((key) => previous[key]).filter(Boolean);
+    if (!(await assertOwnedBlobUrls(newImageUrls, { type: "admin" }, legacyUrls))) {
+      return NextResponse.json({ error: "Foto pengaturan harus diunggah melalui dashboard admin." }, { status: 400 });
+    }
+
     const sql = getDb();
     for (const [key, value] of Object.entries(updates)) {
       await sql`
@@ -97,6 +105,10 @@ export async function PUT(request: Request) {
         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
       `;
     }
+
+    await markBlobUrlsAttached(newImageUrls, { type: "admin" });
+    const nextImageUrls = IMAGE_SETTING_KEYS.map((key) => updates[key] ?? previous[key]).filter(Boolean);
+    await cleanupUnusedBlobUrls(legacyUrls.filter((url) => !nextImageUrls.includes(url)));
 
     return NextResponse.json({
       ok: true,

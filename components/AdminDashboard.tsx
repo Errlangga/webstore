@@ -2,8 +2,24 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { Product, ProductDocument, Testimonial, ProductStatus } from "@/lib/types";
 import { formatRupiah } from "@/lib/format";
+
+type MarketplaceListing = {
+  id: number;
+  title: string;
+  slug: string;
+  price: number | string;
+  category: string;
+  status: ProductStatus;
+  images: string[];
+  documents: ProductDocument[];
+  seller_username?: string;
+  seller_whatsapp?: string;
+  source: "admin" | "member";
+  created_at: string;
+};
 
 type ProductForm = {
   title: string;
@@ -39,8 +55,9 @@ export default function AdminDashboard() {
   const heroCard1FileRef = useRef<HTMLInputElement>(null);
   const heroCard2FileRef = useRef<HTMLInputElement>(null);
   const fcMobileLogoFileRef = useRef<HTMLInputElement>(null);
-  const [tab, setTab] = useState<"products" | "testimonials" | "security" | "settings">("products");
+  const [tab, setTab] = useState<"products" | "marketplace" | "testimonials" | "security" | "settings">("products");
   const [products, setProducts] = useState<Product[]>([]);
+  const [marketplaceListings, setMarketplaceListings] = useState<MarketplaceListing[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [form, setForm] = useState<ProductForm>(blankProduct);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -70,19 +87,22 @@ export default function AdminDashboard() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [productResponse, testimonialResponse, settingsResponse] = await Promise.all([
+      const [productResponse, marketplaceResponse, testimonialResponse, settingsResponse] = await Promise.all([
         fetch("/api/admin/products", { cache: "no-store" }),
+        fetch("/api/admin/marketplace", { cache: "no-store" }),
         fetch("/api/admin/testimonials", { cache: "no-store" }),
         fetch("/api/admin/settings", { cache: "no-store" }),
       ]);
-      if (productResponse.status === 401 || testimonialResponse.status === 401 || settingsResponse.status === 401) {
+      if (productResponse.status === 401 || marketplaceResponse.status === 401 || testimonialResponse.status === 401 || settingsResponse.status === 401) {
         router.replace(`${ADMIN_DASHBOARD_PATH}/login`);
         return;
       }
       const productData = await responseData(productResponse);
+      const marketplaceData = await responseData(marketplaceResponse);
       const testimonialData = await responseData(testimonialResponse);
       const settingsData = await responseData(settingsResponse);
       setProducts(productData.products || []);
+      setMarketplaceListings(marketplaceData.listings || []);
       setTestimonials(testimonialData.testimonials || []);
       setWhatsappNumber(settingsData.settings?.whatsapp_number || "");
       setHeroCardImage1(settingsData.settings?.hero_card_image_1 || "");
@@ -206,6 +226,29 @@ export default function AdminDashboard() {
       await loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Status stok gagal diperbarui.");
+    }
+  }
+
+
+  async function removeMarketplaceListing(item: MarketplaceListing) {
+    const owner = item.source === "member"
+      ? `seller @${item.seller_username || "member"}`
+      : "katalog admin";
+    if (!window.confirm(`Hapus "${item.title}" dari Cari Akun (${owner})? Tindakan ini tidak bisa dibatalkan.`)) return;
+    setBusy(true); setError(""); setNotice("");
+    try {
+      const response = await fetch("/api/admin/marketplace", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: item.id, source: item.source }),
+      });
+      await responseData(response);
+      setNotice(`Katalog "${item.title}" berhasil dihapus dari marketplace.`);
+      await loadData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Katalog gagal dihapus.");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -381,6 +424,7 @@ export default function AdminDashboard() {
       {notice && <div className="admin-alert" role="status">{notice}</div>}
       <div className="admin-tabs" role="tablist">
         <button className={tab === "products" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("products"); setError(""); }} role="tab" aria-selected={tab === "products"}>Katalog akun ({products.length})</button>
+        <button className={tab === "marketplace" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("marketplace"); setError(""); }} role="tab" aria-selected={tab === "marketplace"}>Cari Akun ({marketplaceListings.length})</button>
         <button className={tab === "testimonials" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("testimonials"); setError(""); }} role="tab" aria-selected={tab === "testimonials"}>Testimoni Rekber ({testimonials.length})</button>
         <button className={tab === "security" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("security"); setError(""); }} role="tab" aria-selected={tab === "security"}>Keamanan akun</button>
         <button className={tab === "settings" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("settings"); setError(""); }} role="tab" aria-selected={tab === "settings"}>Pengaturan store</button>
@@ -416,6 +460,33 @@ export default function AdminDashboard() {
             {!products.length ? <div className="admin-empty">Belum ada akun. Tambahkan akun pertama melalui formulir ini.</div> : <div className="admin-list">{products.map((product) => <article className="admin-list-item" key={product.id}><div className="admin-list-thumb">{product.images?.[0] ? <img src={product.images[0]} alt="" /> : "OVR"}</div><div className="admin-list-info"><b>{product.title}</b><small>{formatRupiah(Number(product.price))} · {product.status === "available" ? "Tersedia" : "Terjual"}{product.featured ? " · Featured" : ""}</small><small>{product.images?.length || 0} foto · {product.documents?.length || 0} dokumen · {product.seller_whatsapp ? "Seller WA aktif" : "WA admin"} · #{product.id}</small></div><div className="admin-list-actions"><button className="small-button" onClick={() => startEdit(product)}>Edit</button><button className="small-button" onClick={() => void toggleStatus(product)}>{product.status === "available" ? "Tandai terjual" : "Aktifkan stok"}</button><button className="small-button danger" onClick={() => void removeProduct(Number(product.id))}>Hapus</button></div></article>)}</div>}
           </section>
         </div>
+
+      ) : tab === "marketplace" ? (
+        <section className="admin-panel">
+          <div className="member-section-title">
+            <div><span className="mini-label">MARKETPLACE MODERATION</span><h2>Semua listing Cari Akun</h2></div>
+            <span className="admin-badge">{marketplaceListings.length} listing</span>
+          </div>
+          <p>Halaman ini menampilkan listing dari admin dan seller member, termasuk stok terjual. Hapus listing yang melanggar atau tidak lagi layak ditampilkan.</p>
+          {!marketplaceListings.length ? <div className="admin-empty">Belum ada listing di marketplace.</div> : (
+            <div className="admin-list">
+              {marketplaceListings.map((item) => (
+                <article className="admin-list-item member-list-item" key={`${item.source}-${item.id}`}>
+                  <div className="admin-list-thumb">{item.images?.[0] ? <img src={item.images[0]} alt="" /> : <strong>{item.title.slice(0, 1).toUpperCase()}</strong>}</div>
+                  <div className="admin-list-info">
+                    <b>{item.title}</b>
+                    <small>{formatRupiah(Number(item.price))} · {item.status === "available" ? "Tersedia" : "Terjual"}</small>
+                    <small>{item.source === "member" ? `Seller @${item.seller_username || "member"}` : "Dipasang admin"} · {item.images?.length || 0} foto · {item.documents?.length || 0} dokumen</small>
+                    <Link className="member-list-link" href={`/stock/${item.slug}`} target="_blank">Lihat detail ↗</Link>
+                  </div>
+                  <div className="admin-list-actions">
+                    <button type="button" className="small-button danger" disabled={busy} onClick={() => void removeMarketplaceListing(item)}>Hapus listing</button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
       ) : tab === "testimonials" ? (
         <div className="admin-content-grid">
           <section className="admin-panel">

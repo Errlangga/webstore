@@ -9,8 +9,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, noarchive: true },
 };
 
-export default async function AccountPage({ searchParams }: { searchParams: Promise<{ mode?: string }> }) {
-  if (await getMarketUser()) redirect("/");
+function safeNextPath(value?: string) {
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\") || value.includes("\\")) return "/";
+  if (value.startsWith("/account") || value.startsWith("/api/")) return "/";
+  return value;
+}
+
+export default async function AccountPage({ searchParams }: { searchParams: Promise<{ mode?: string; next?: string }> }) {
   const params = await searchParams;
-  return <AccountAccessForm initialMode={params.mode === "login" ? "login" : "register"} />;
+  const nextPath = safeNextPath(params.next);
+  if (await getMarketUser()) redirect(nextPath);
+  return <AccountAccessForm initialMode={params.mode === "login" ? "login" : "register"} nextPath={nextPath} />;
 }
