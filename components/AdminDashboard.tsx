@@ -221,10 +221,10 @@ export default function AdminDashboard() {
       await responseData(response);
       setBuyerName(""); setProductTitle(""); setMessage(""); setRating("5"); setVisible(true); setProofFile(null);
       if (proofFileRef.current) proofFileRef.current.value = "";
-      setNotice("Testimoni berhasil ditambahkan.");
+      setNotice("Testimoni Rekber berhasil ditambahkan.");
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Testimoni gagal disimpan.");
+      setError(err instanceof Error ? err.message : "Testimoni Rekber gagal disimpan.");
     } finally {
       setBusy(false);
     }
@@ -238,20 +238,20 @@ export default function AdminDashboard() {
         body: JSON.stringify({ id: Number(item.id), visible: !item.visible }),
       });
       await responseData(response);
-      setNotice(item.visible ? "Testimoni disembunyikan." : "Testimoni dipublikasikan.");
+      setNotice(item.visible ? "Testimoni Rekber disembunyikan." : "Testimoni Rekber dipublikasikan.");
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Status testimoni gagal diubah.");
+      setError(err instanceof Error ? err.message : "Status Testimoni Rekber gagal diubah.");
     }
   }
 
   async function removeTestimonial(id: number) {
-    if (!window.confirm("Hapus testimoni ini?")) return;
+    if (!window.confirm("Hapus Testimoni Rekber ini?")) return;
     setError(""); setNotice("");
     try {
       const response = await fetch("/api/admin/testimonials", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
       await responseData(response);
-      setNotice("Testimoni dihapus.");
+      setNotice("Testimoni Rekber dihapus.");
       await loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Testimoni gagal dihapus.");
@@ -374,14 +374,14 @@ export default function AdminDashboard() {
   return (
     <div className="admin-shell">
       <div className="admin-topline">
-        <div><div className="eyebrow"><span className="eyebrow-dot" /> STORE CONTROL CENTER</div><h1>Admin dashboard.</h1><p>Kelola katalog, foto, status stok, dan feedback pembeli.</p></div>
+        <div><div className="eyebrow"><span className="eyebrow-dot" /> STORE CONTROL CENTER</div><h1>Admin dashboard.</h1><p>Kelola katalog akun, testimoni rekber, keamanan, dan pengaturan store.</p></div>
         <div style={{ display: "flex", gap: 9, alignItems: "center", flexWrap: "wrap" }}><a href="/" className="small-button">Lihat store ↗</a><button type="button" className="small-button" onClick={logout}>Keluar</button></div>
       </div>
       {error && <div className="admin-alert error" role="alert">{error}</div>}
       {notice && <div className="admin-alert" role="status">{notice}</div>}
       <div className="admin-tabs" role="tablist">
         <button className={tab === "products" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("products"); setError(""); }} role="tab" aria-selected={tab === "products"}>Katalog akun ({products.length})</button>
-        <button className={tab === "testimonials" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("testimonials"); setError(""); }} role="tab" aria-selected={tab === "testimonials"}>Testimoni ({testimonials.length})</button>
+        <button className={tab === "testimonials" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("testimonials"); setError(""); }} role="tab" aria-selected={tab === "testimonials"}>Testimoni Rekber ({testimonials.length})</button>
         <button className={tab === "security" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("security"); setError(""); }} role="tab" aria-selected={tab === "security"}>Keamanan akun</button>
         <button className={tab === "settings" ? "admin-tab active" : "admin-tab"} onClick={() => { setTab("settings"); setError(""); }} role="tab" aria-selected={tab === "settings"}>Pengaturan store</button>
       </div>
@@ -419,23 +419,23 @@ export default function AdminDashboard() {
       ) : tab === "testimonials" ? (
         <div className="admin-content-grid">
           <section className="admin-panel">
-            <h2>Tambah testimoni</h2>
+            <h2>Tambah Testimoni Rekber</h2>
             <form className="admin-form" onSubmit={saveTestimonial}>
               <label className="form-field"><span>Nama pembeli</span><input required minLength={2} maxLength={100} value={buyerName} onChange={(e) => setBuyerName(e.target.value)} placeholder="Nama yang sudah memberi izin" /></label>
               <label className="form-field"><span>Produk / akun yang dibeli</span><input required minLength={2} maxLength={140} value={productTitle} onChange={(e) => setProductTitle(e.target.value)} placeholder="Nama akun" /></label>
-              <label className="form-field"><span>Isi testimoni</span><textarea required minLength={5} maxLength={2500} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Gunakan ulasan asli dari pembeli dengan izin." /></label>
+              <label className="form-field"><span>Isi Testimoni Rekber</span><textarea required minLength={5} maxLength={2500} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Gunakan ulasan asli dari pembeli dengan izin." /></label>
               <div className="form-row">
                 <label className="form-field"><span>Rating</span><select value={rating} onChange={(e) => setRating(e.target.value)}><option value="5">5 / 5</option><option value="4">4 / 5</option><option value="3">3 / 5</option><option value="2">2 / 5</option><option value="1">1 / 5</option></select></label>
                 <label className="form-field"><span>Bukti transaksi (opsional)</span><input ref={proofFileRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => setProofFile(e.target.files?.[0] || null)} /></label>
               </div>
               <small className="form-hint">Sensor nomor HP, email, ID, password, dan data pribadi pada bukti sebelum upload. Unggah hanya dengan izin pembeli.</small>
-              <label className="checkbox-field"><input type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)} /> Langsung publikasikan testimoni</label>
-              <button type="submit" className="button button-primary" disabled={busy}>{busy ? "Menyimpan..." : "Simpan testimoni"} <span>↗</span></button>
+              <label className="checkbox-field"><input type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)} /> Langsung publikasikan Testimoni Rekber</label>
+              <button type="submit" className="button button-primary" disabled={busy}>{busy ? "Menyimpan..." : "Simpan Testimoni Rekber"} <span>↗</span></button>
             </form>
           </section>
           <section className="admin-panel">
-            <h2>Feedback pembeli <span className="admin-badge">{testimonials.length} item</span></h2>
-            {!testimonials.length ? <div className="admin-empty">Belum ada testimoni. Masukkan ulasan asli dan jangan membuat bukti transaksi palsu.</div> : <div className="admin-list">{testimonials.map((item) => <article className="admin-list-item" key={item.id}><div className="admin-list-thumb">{item.image_url ? <img src={item.image_url} alt="" /> : item.buyer_name.slice(0, 1).toUpperCase()}</div><div className="admin-list-info"><b>{item.buyer_name} · {"★".repeat(item.rating)}</b><small>{item.product_title}</small><small>{item.visible ? "Dipublikasikan" : "Disembunyikan"} · {item.message.slice(0, 75)}{item.message.length > 75 ? "…" : ""}</small></div><div className="admin-list-actions"><button className="small-button" onClick={() => void toggleTestimonial(item)}>{item.visible ? "Sembunyikan" : "Publikasikan"}</button><button className="small-button danger" onClick={() => void removeTestimonial(Number(item.id))}>Hapus</button></div></article>)}</div>}
+            <h2>Daftar Testimoni Rekber <span className="admin-badge">{testimonials.length} item</span></h2>
+            {!testimonials.length ? <div className="admin-empty">Belum ada Testimoni Rekber. Tambahkan ulasan asli dengan izin pembeli dan jangan membuat bukti transaksi palsu.</div> : <div className="admin-list">{testimonials.map((item) => <article className="admin-list-item" key={item.id}><div className="admin-list-thumb">{item.image_url ? <img src={item.image_url} alt="" /> : item.buyer_name.slice(0, 1).toUpperCase()}</div><div className="admin-list-info"><b>{item.buyer_name} · {"★".repeat(item.rating)}</b><small>{item.product_title}</small><small>{item.visible ? "Dipublikasikan" : "Disembunyikan"} · {item.message.slice(0, 75)}{item.message.length > 75 ? "…" : ""}</small></div><div className="admin-list-actions"><button className="small-button" onClick={() => void toggleTestimonial(item)}>{item.visible ? "Sembunyikan" : "Publikasikan"}</button><button className="small-button danger" onClick={() => void removeTestimonial(Number(item.id))}>Hapus</button></div></article>)}</div>}
           </section>
         </div>
       ) : tab === "security" ? (

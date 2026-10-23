@@ -3,15 +3,15 @@
 Astra Market FC Mobile account storefront built with Next.js App Router, Neon Postgres, and Vercel Blob.
 
 ## Features
-- Responsive landing page, stock catalogue, product detail pages, and testimonials.
+- Responsive landing page, public Cari Akun catalogue, product detail pages, and Testimoni Rekber.
 - Password-protected admin dashboard for products, seller WhatsApp contacts, multi-image galleries, stock status, testimonials, visual settings, and account security (change/reset password).
 - Product photos stored in Vercel Blob; product data stored in Neon.
-- “Jasa Posting” CTA opens WhatsApp admin with a prefilled request message.
+- “Jasa Rekber / Midman” CTA opens WhatsApp admin with a prefilled request message.
 - Each catalog item can optionally specify a seller WhatsApp number; otherwise enquiries route to the store admin.
 - Admin route prefix is configurable; direct `/admin` paths return 404 in production and the dashboard still requires a valid signed session.
 - Admin login attempts are rate-limited to five attempts per IP fingerprint per 15-minute window.
-- Member accounts use salted scrypt password hashes and signed HTTP-only sessions.
-- Members can publish, edit, or delete up to 3 catalog listings per account; their listings appear in the public marketplace and WhatsApp contact routes to the seller.
+- Member accounts use salted scrypt password hashes and signed HTTP-only sessions. Navigation separates the public `/cari-akun` marketplace from the private-per-member `/my-katalog` management page.
+- Members can create, edit, or delete up to 3 catalog listings per account from the prominent Buat Katalog action in `/my-katalog`; only listings with available stock appear on `/cari-akun`, and WhatsApp contact routes to the seller.
 - “Jasa Rekber / Midman” opens a prefilled WhatsApp message to store admin; it is a contact flow, not an automated escrow/payment processor.
 - Up to 10 public document attachments per listing (PDF, TXT, CSV, DOC/DOCX, XLS/XLSX, PPTX), 4 MB each.
 
@@ -36,4 +36,4 @@ Astra Market FC Mobile account storefront built with Next.js App Router, Neon Po
 - `NEXT_PUBLIC_WHATSAPP_NUMBER`: recommended WhatsApp number for direct-to-admin chat in international format, digits only (e.g. `6281234567890`).
 - `NEXT_PUBLIC_SITE_URL`: canonical public URL for robots.txt and sitemap (set this to the actual production domain).
 
-Never commit `.env.local` or production secrets. Configure secrets in the Vercel project environment settings. Password changes are stored in Neon; resetting restores the `ADMIN_PASSWORD` bootstrap value. Testimonial creation, photo uploads, edits to visibility, and deletion are restricted to an authenticated admin. Use genuine buyer testimonials only, with permission from the buyer.
+Never commit `.env.local` or production secrets. Configure secrets in the Vercel project environment settings. Password changes are stored in Neon; resetting restores the `ADMIN_PASSWORD` bootstrap value. Testimoni Rekber creation, photo uploads, edits to visibility, and deletion are restricted to an authenticated admin. Use genuine buyer testimonials only, with permission from the buyer.

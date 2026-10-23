@@ -7,8 +7,8 @@ import { whatsappUrl } from "@/lib/format";
 
 const links = [
   { href: "/", label: "Beranda" },
-  { href: "/stock", label: "Katalog akun" },
-  { href: "/testimoni", label: "Testimoni" },
+  { href: "/cari-akun", label: "Cari Akun" },
+  { href: "/testimoni", label: "Testimoni Rekber" },
 ];
 
 export default function SiteNav() {
@@ -31,6 +31,8 @@ export default function SiteNav() {
     return () => { active = false; };
   }, []);
 
+  const navigationLinks = memberUsername ? [...links, { href: "/my-katalog", label: "My Katalog" }] : links;
+
   const postingUrl = whatsappUrl(
     "Halo admin Astra Market FC Mobile, saya ingin menggunakan jasa rekber / midman. Boleh minta informasi alur dan biayanya?",
     adminWhatsapp,
@@ -42,7 +44,7 @@ export default function SiteNav() {
           <img className="brand-logo" src="/astra-market-logo.svg" alt="Astra Market FC Mobile" width="280" height="58" />
         </Link>
         <nav className="main-nav" aria-label="Navigasi utama">
-          {links.map((link) => (
+          {navigationLinks.map((link) => (
             <Link key={link.href} href={link.href} className={pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href + "/")) ? "nav-link active" : "nav-link"}>
               {link.label}
             </Link>
