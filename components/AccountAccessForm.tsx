@@ -12,7 +12,7 @@ async function readResponse(response: Response) {
   return data;
 }
 
-export default function AccountAccessForm({ initialMode = "register" }: { initialMode?: Mode }) {
+export default function AccountAccessForm({ initialMode = "register", nextPath = "/" }: { initialMode?: Mode; nextPath?: string }) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>(initialMode);
   const [username, setUsername] = useState("");
@@ -32,7 +32,7 @@ export default function AccountAccessForm({ initialMode = "register" }: { initia
       }));
       setNotice(mode === "register" ? "Akun berhasil dibuat. Selamat datang!" : "Login berhasil.");
       setPassword("");
-      router.push("/");
+      router.replace(nextPath);
       router.refresh();
       void data;
     } catch (err) {
@@ -67,7 +67,7 @@ export default function AccountAccessForm({ initialMode = "register" }: { initia
             {mode === "register" ? "Login di sini" : "Buat akun"}
           </button>
         </div>
-        <div className="account-access-foot"><span>01 / MEMBER ACCESS</span><Link href="/stock">Lihat katalog publik ↗</Link></div>
+        <div className="account-access-foot"><span>01 / MEMBER ACCESS</span><Link href="/cari-akun">Cari akun ↗</Link></div>
       </section>
       <aside className="account-access-aside">
         <div className="aside-orbit" />
