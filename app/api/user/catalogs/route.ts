@@ -56,6 +56,10 @@ export async function POST(request: Request) {
     `;
     return NextResponse.json({ catalog: rows[0], limit: 3 }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message.includes("USER_CATALOG_LIMIT")) {
+      return NextResponse.json({ error: "Batas maksimal 3 katalog per akun sudah tercapai." }, { status: 409 });
+    }
     console.error("User catalog create failed:", error);
     return NextResponse.json({ error: "Katalog gagal dibuat. Coba lagi." }, { status: 500 });
   }
