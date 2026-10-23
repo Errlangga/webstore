@@ -18,7 +18,7 @@ export async function GET() {
       WHERE user_id = ${user.id}
       ORDER BY created_at DESC
     `;
-    return NextResponse.json({ catalogs: rows, limit: 3 }, { headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({ catalogs: rows.map((row) => ({ ...row, id: Number(row.id), price: Number(row.price), images: Array.isArray(row.images) ? row.images : [], documents: Array.isArray(row.documents) ? row.documents : [] })), limit: 3 }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("User catalog list failed:", error);
     return NextResponse.json({ error: "Katalog kamu gagal dimuat." }, { status: 500 });
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       )
       RETURNING id, user_id, title, slug, price, description, category, players, seller_whatsapp, images, documents, status, created_at, updated_at
     `;
-    return NextResponse.json({ catalog: rows[0], limit: 3 }, { status: 201, headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({ catalog: { ...rows[0], id: Number(rows[0].id), price: Number(rows[0].price) }, limit: 3 }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     if (message.includes("USER_CATALOG_LIMIT")) {
