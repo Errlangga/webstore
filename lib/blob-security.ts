@@ -141,6 +141,7 @@ export async function markBlobUrlsAttached(urls: string[], owner: BlobOwner) {
 
 export async function checkUploadCapacity(owner: BlobOwner, kind: UploadKind, nextBytes: number) {
   const sql = getDb();
+  await sql`DELETE FROM catalog_uploads WHERE deleted = true AND created_at < NOW() - INTERVAL '30 days'`;
   const rows = owner.type === "admin"
     ? await sql`
         SELECT
