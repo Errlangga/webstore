@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { whatsappUrl } from "@/lib/format";
 
@@ -13,7 +13,6 @@ const links = [
 
 export default function SiteNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const [adminWhatsapp, setAdminWhatsapp] = useState("");
   const [memberUsername, setMemberUsername] = useState("");
 
