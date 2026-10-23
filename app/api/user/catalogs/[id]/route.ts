@@ -47,7 +47,7 @@ export async function PUT(request: Request, context: Context) {
       RETURNING id, user_id, title, slug, price, description, category, players, seller_whatsapp, images, documents, status, created_at, updated_at
     `;
     if (!rows.length) return NextResponse.json({ error: "Katalog tidak ditemukan atau bukan milik akun kamu." }, { status: 404 });
-    return NextResponse.json({ catalog: { ...rows[0], id: Number(rows[0].id), price: Number(rows[0].price) }, headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({ catalog: { ...rows[0], id: Number(rows[0].id), price: Number(rows[0].price) } }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("User catalog update failed:", error);
     return NextResponse.json({ error: "Perubahan katalog gagal disimpan." }, { status: 500 });
